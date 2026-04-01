@@ -5,6 +5,11 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { sendEmail } from "../utils/resend.js";
 
+// import asyncHandler from "express-async-handler";
+// import User from "../models/userModel.js";
+// import generateToken from "../utils/generateToken.js";
+// import { sendEmail } from "../services/emailService.js";
+
 /*
 ========================================
 SIGNUP
@@ -12,47 +17,70 @@ SIGNUP
 POST /api/auth/signup
 */
 export const signup = asyncHandler(async (req, res) => {
-  const { name, email, password, bitcoinAddress, litecoinAddress } = req.body;
+ const { name, email, password, bitcoinAddress, litecoinAddress } = req.body;
 
-  // validate fields
-  if (!name || !email || !password) {
-    res.status(400);
-    throw new Error("Name, email and password are required");
-  }
+ // validate fields
+ if (!name || !email || !password) {
+ res.status(400);
+ throw new Error("Name, email and password are required");
+ }
 
-  // password must contain letter and number
-  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d).+$/;
+ // password must contain letter and number
+ const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d).+$/;
 
-  if (!passwordRegex.test(password)) {
-    res.status(400);
-    throw new Error("Password must contain letters and numbers");
-  }
+ if (!passwordRegex.test(password)) {
+ res.status(400);
+ throw new Error("Password must contain letters and numbers");
+ }
 
-  // check if user exists
-  const userExists = await User.findOne({ email });
+ // check if user exists
+ const userExists = await User.findOne({ email });
 
-  if (userExists) {
-    res.status(400);
-    throw new Error("User already exists");
-  }
+ if (userExists) {
+ res.status(400);
+ throw new Error("User already exists");
+ }
 
-  // create user
-  const user = await User.create({
-    name,
-    email,
-    password,
-    bitcoinAddress: bitcoinAddress || "",
-    litecoinAddress: litecoinAddress || "",
-  });
+ // create user
+ const user = await User.create({
+ name,
+ email,
+ password,
+ bitcoinAddress: bitcoinAddress || "",
+ litecoinAddress: litecoinAddress || "",
+ });
 
-  res.status(201).json({
-    _id: user._id,
-    name: user.name,
-    email: user.email,
-    role: user.role,
-    token: generateToken(user._id),
-  });
+ /*
+ ========================================
+ SEND WELCOME EMAIL
+ ========================================
+ */
+ try {
+ await sendEmail(
+ email,
+ "Welcome to Wealtment",
+ `
+ <h2>Hello ${name}</h2>
+ <p>Your account has been created successfully.</p>
+ <p>Welcome to Wealtment Investment Platform.</p>
+ <br/>
+ <small>Wealtment Team</small>
+ `
+ );
+ } catch (error) {
+ console.log("Email error:", error.message);
+ }
+
+ res.status(201).json({
+ _id: user._id,
+ name: user.name,
+ email: user.email,
+ role: user.role,
+ token: generateToken(user._id),
+ });
 });
+
+
 
 /*
 ========================================
