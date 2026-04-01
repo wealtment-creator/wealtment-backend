@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
-import helmet from "helmet";
-import morgan from "morgan";
+import dotenv from "dotenv";
+import connectDB from "./config/db.js";
 
 // Routes
 import authRoutes from "./routes/authRoutes.js";
@@ -11,43 +11,48 @@ import depositRoutes from "./routes/depositRoutes.js";
 import packageRoutes from "./routes/packageRoutes.js";
 import withdrawalRoutes from "./routes/withdrawalRoutes.js";
 
-// Middleware
-import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
-
 // Utils
-// Make sure resend.js has dotenv loading, no need to load here again
-// import { sendEmail } from "./utils/resend.js"; // optional test route
+import { sendEmail } from "./utils/resend.js";
+
+// Load env variables
+dotenv.config();
 
 const app = express();
 
-/*
-========================================
-GLOBAL MIDDLEWARE
-========================================
-*/
+// Connect Database
+connectDB();
+
+// =======================
+// CORS Setup
+// =======================
+const allowedOrigins = [
+"http://localhost:3000",
+"http://localhost:3001",
+"http://localhost:5173",
+process.env.FRONTEND_URL, // deployed frontend
+];
+
+app.use(
+cors({
+origin: function (origin, callback) {
+if (!origin) return callback(null, true); // allow Postman or server requests
+const allowed = allowedOrigins.some((o) => origin.startsWith(o));
+if (allowed) return callback(null, true);
+console.log("Blocked by CORS:", origin);
+return callback(new Error("Not allowed by CORS"));
+},
+credentials: true,
+})
+);
+
+// =======================
+// Middlewares
+// =======================
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cors());
-app.use(helmet());
-app.use(morgan("dev"));
 
-/*
-========================================
-HEALTH CHECK ROUTE
-========================================
-*/
-app.get("/", (req, res) => {
-res.status(200).json({
-success: true,
-message: "Wealthment API is running",
-});
-});
-
-/*
-========================================
-API ROUTES
-========================================
-*/
+// =======================
+// Routes
+// =======================
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/admin", adminRoutes);
@@ -55,18 +60,28 @@ app.use("/api/deposit", depositRoutes);
 app.use("/api/package", packageRoutes);
 app.use("/api/withdrawals", withdrawalRoutes);
 
-/*
-========================================
-404 NOT FOUND
-========================================
-*/
-app.use(notFound);
+// =======================
+// Test Email Route
+// =======================
+app.get("/test-email", async (req, res) => {
+try {
+await sendEmail({
+to: "yourrealemail@gmail.com",
+subject: "Test Email",
+html: "<h1>Email Working!</h1>",
+});
+res.json({ message: "Email sent successfully" });
+} catch (err) {
+console.error("Test email error:", err);
+res.status(500).json({ error: err.message });
+}
+});
 
-/*
-========================================
-GLOBAL ERROR HANDLER
-========================================
-*/
-app.use(errorHandler);
+// =======================
+// Health Check
+// =======================
+app.get("/", (req, res) => {
+res.json({ message: "Wealthment API running" });
+});
 
 export default app;
