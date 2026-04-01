@@ -1,37 +1,40 @@
-
 import { Resend } from "resend";
-import dotenv from "dotenv";
 
-dotenv.config();
+let resend;
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+/*
+========================================
+INITIALIZE RESEND
+========================================
+*/
+export const initResend = (apiKey) => {
+if (!apiKey) throw new Error("RESEND_API_KEY is required to initialize Resend");
+resend = new Resend(apiKey);
+return resend;
+};
 
+/*
+========================================
+SEND EMAIL FUNCTION
+========================================
+*/
 export const sendEmail = async ({ to, subject, html }) => {
-await resend.emails.send({
-from: process.env.RESEND_FROM_EMAIL,
+if (!resend) throw new Error("Resend is not initialized. Call initResend(apiKey) first.");
+
+try {
+const response = await resend.emails.send({
+from: process.env.EMAIL_FROM,
 to,
 subject,
 html,
 });
+
+console.log("Email sent:", response);
+return response;
+} catch (error) {
+console.log("Resend error:", error);
+throw error;
+}
 };
 
-
-
-
-// import { Resend } from "resend";
-// import dotenv from "dotenv";
-
-// dotenv.config();
-
-// // import { Resend } from "resend";
-
-// const resend = new Resend(process.env.RESEND_API_KEY);
-
-// export const sendEmail = async (to, subject, html) => {
-// await resend.emails.send({
-// from: process.env.RESEND_FROM_EMAIL,
-// to,
-// subject,
-// html,
-// });
-// };
+export default resend;

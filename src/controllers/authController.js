@@ -13,116 +13,66 @@ import asyncHandler from "express-async-handler";
 import User from "../models/userModel.js";
 import generateToken from "../utils/generateToken.js";
 import jwt from "jsonwebtoken";
-// import { sendWelcomeEmail } from "../services/emailService.js";
+import { sendWelcomeEmail } from "../services/emailService.js";
 
+/*
+========================================
+SIGNUP
+========================================
+POST /api/auth/signup
+*/
+export const signup = asyncHandler(async (req, res) => {
+ const { name, email, password, bitcoinAddress, litecoinAddress } = req.body;
 
+ // Validate required fields
+ if (!name || !email || !password) {
+ res.status(400);
+ throw new Error("Name, email and password are required");
+ }
 
+ // Password must contain letters and numbers
+ const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d).+$/;
+ if (!passwordRegex.test(password)) {
+ res.status(400);
+ throw new Error("Password must contain letters and numbers");
+ }
 
+ // Check if user already exists
+ const userExists = await User.findOne({ email });
+ if (userExists) {
+ res.status(400);
+ throw new Error("User already exists");
+ }
 
+ // Create new user
+ const user = await User.create({
+ name,
+ email,
+ password,
+ bitcoinAddress: bitcoinAddress || "",
+ litecoinAddress: litecoinAddress || "",
+ });
 
-import {
-sendWelcomeEmail,
-// sendResetEmail
-} from "../services/emailService.js";
+ /*
+ ========================================
+ SEND WELCOME EMAIL
+ ========================================
+ */
+ try {
+ await sendWelcomeEmail(email, name);
+ } catch (error) {
+ console.log("Email error:", error.message);
+ }
 
-
-/* ===============================
-REGISTER USER
-================================ */
-export const signup = async (req, res) => {
-try {
-const { name, email, password } = req.body;
-if (!name || !email || !password)
-return res.status(400).json({ success: false, message: "All fields required" });
-
-const existingUser = await User.findOne({ email: email.toLowerCase() });
-if (existingUser)
-return res.status(400).json({ success: false, message: "User already exists" });
-
-const user = await User.create({
-name,
-email: email.toLowerCase(),
-password, // pre-save hook hashes automatically
+ // Respond with user data and token
+ res.status(201).json({
+ _id: user._id,
+ name: user.name,
+ email: user.email,
+ role: user.role,
+ token: generateToken(user._id),
+ });
 });
-
-try { await sendWelcomeEmail(user.email, user.name); } catch (err) { console.log("Email error:", err.message); }
-
-const token = generateToken(user);
-
-res.status(201).json({ success: true, message: "User registered", token, user });
-} catch (error) {
-console.log(error);
-res.status(500).json({ success: false, message: error.message });
-}
-};
-
-
-
-
-
-
-
-
-
-
-// /*
-// ========================================
-// SIGNUP
-// ========================================
-// POST /api/auth/signup
-// */
-// export const signup = asyncHandler(async (req, res) => {
-//  const { name, email, password, bitcoinAddress, litecoinAddress } = req.body;
-
-//  // Validate required fields
-//  if (!name || !email || !password) {
-//  res.status(400);
-//  throw new Error("Name, email and password are required");
-//  }
-
-//  // Password must contain letters and numbers
-//  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d).+$/;
-//  if (!passwordRegex.test(password)) {
-//  res.status(400);
-//  throw new Error("Password must contain letters and numbers");
-//  }
-
-//  // Check if user already exists
-//  const userExists = await User.findOne({ email });
-//  if (userExists) {
-//  res.status(400);
-//  throw new Error("User already exists");
-//  }
-
-//  // Create new user
-//  const user = await User.create({
-//  name,
-//  email,
-//  password,
-//  bitcoinAddress: bitcoinAddress || "",
-//  litecoinAddress: litecoinAddress || "",
-//  });
-
-//  /*
-//  ========================================
-//  SEND WELCOME EMAIL
-//  ========================================
-//  */
-//  try {
-//  await sendWelcomeEmail(email, name);
-//  } catch (error) {
-//  console.log("Email error:", error.message);
-//  }
-
-//  // Respond with user data and token
-//  res.status(201).json({
-//  _id: user._id,
-//  name: user.name,
-//  email: user.email,
-//  role: user.role,
-//  token: generateToken(user._id),
-//  });
-// });
 
 /*
 ========================================

@@ -3,6 +3,7 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 
+// Routes
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
@@ -10,7 +11,12 @@ import depositRoutes from "./routes/depositRoutes.js";
 import packageRoutes from "./routes/packageRoutes.js";
 import withdrawalRoutes from "./routes/withdrawalRoutes.js";
 
+// Middleware
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
+
+// Utils
+// Make sure resend.js has dotenv loading, no need to load here again
+// import { sendEmail } from "./utils/resend.js"; // optional test route
 
 const app = express();
 
@@ -31,10 +37,10 @@ HEALTH CHECK ROUTE
 ========================================
 */
 app.get("/", (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "Wealthment API is running",
-  });
+res.status(200).json({
+success: true,
+message: "Wealthment API is running",
+});
 });
 
 /*

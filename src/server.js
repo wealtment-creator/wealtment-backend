@@ -1,14 +1,12 @@
-import app from "./app.js";
-import connectDB from "./config/db.js";
 import dotenv from "dotenv";
+import path from "path";
+import app from "./app.js";
 
-dotenv.config();
-
-// connect database
-connectDB();
+// Load .env from backend root
+dotenv.config({ path: path.resolve("../.env") });
 
 const PORT = process.env.PORT || 6000;
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+console.log(`Server running on http://localhost:${PORT}`);
 });
