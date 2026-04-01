@@ -23,7 +23,7 @@ export const protect = asyncHandler(async (req, res, next) => {
   }
 });
 
-// admin only
+// admin only 3
 export const adminOnly = (req, res, next) => {
 
   if (req.user.role === "admin") {
