@@ -4,16 +4,55 @@
 
 import { sendEmail } from "../utils/resend.js";
 
+/*
+========================================
+WELCOME EMAIL
+========================================
+*/
+
 export const sendWelcomeEmail = async (email, name) => {
-  await sendEmail({
-    to: email,
-    subject: "Welcome to Wealtment",
-    html: `
-      <h2>Welcome ${name}</h2>
-      <p>Your account has been created successfully.</p>
-    `,
-  });
+await sendEmail({
+to: email,
+subject: "Welcome to WEALTMENT",
+html: `
+<div style="background:#0b1320;padding:40px;font-family:Arial">
+
+<div style="max-width:600px;margin:auto;background:#111827;padding:30px;border-radius:10px">
+
+<!-- Logo -->
+<div style="text-align:center">
+<img src="${LOGO_URL}" width="150" />
+</div>
+
+<!-- Header -->
+<h2 style="color:#facc15;text-align:center; margin-top:20px;">
+Welcome to WEALTMENT
+</h2>
+
+<!-- Body -->
+<p style="color:white; font-size:16px;">
+Hello ${name},
+</p>
+
+<p style="color:white; font-size:16px;">
+Your account has been created successfully. We’re excited to have you on board!
+</p>
+
+<p style="color:white; font-size:16px;">
+Start exploring Wealthment and take control of your finances today.
+</p>
+
+<!-- Footer -->
+<p style="color:#9ca3af; margin-top:30px; font-size:14px; text-align:center;">
+&copy; ${new Date().getFullYear()} WEALTMENT. All rights reserved.
+</p>
+
+</div>
+</div>
+`,
+});
 };
+
 /*
 ========================================
 DEPOSIT REQUEST EMAIL
