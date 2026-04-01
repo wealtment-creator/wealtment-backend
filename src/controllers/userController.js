@@ -1,0 +1,135 @@
+import User from "../models/userModel.js";
+import Deposit from "../models/depositModel.js";
+
+/*
+========================================
+FETCH USER BALANCE
+========================================
+*/
+
+export const getBalance = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("balance");
+
+    res.json({
+      success: true,
+      balance: user.balance,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+/*
+========================================
+FETCH DEPOSIT HISTORY
+========================================
+*/
+
+export const getDepositHistory = async (req, res) => {
+  try {
+    const { from, to } = req.query;
+
+    const deposits = await Deposit.find({
+      user: req.user.id,
+      createdAt: {
+        $gte: new Date(from),
+        $lte: new Date(to),
+      },
+    });
+
+    res.json({
+      success: true,
+      deposits,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+/*
+========================================
+LAST DEPOSIT
+========================================
+*/
+
+export const getLastDeposit = async (req, res) => {
+  try {
+    const lastDeposit = await Deposit.findOne({
+      user: req.user.id,
+      status: "approved",
+    }).sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      lastDeposit,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+/*
+========================================
+TOTAL DEPOSIT
+========================================
+*/
+
+export const getTotalDeposit = async (req, res) => {
+  try {
+    const deposits = await Deposit.find({
+      user: req.user.id,
+      status: "approved",
+    });
+
+    const total = deposits.reduce(
+      (sum, item) => sum + item.creditAmount,
+      0
+    );
+
+    res.json({
+      success: true,
+      total,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+/*
+========================================
+UPDATE PROFILE
+========================================
+*/
+
+export const updateProfile = async (req, res) => {
+  try {
+    const { name, bitcoinAddress, litecoinAddress } = req.body;
+
+    const user = await User.findById(req.user.id);
+
+    user.name = name || user.name;
+    user.bitcoinAddress = bitcoinAddress || user.bitcoinAddress;
+    user.litecoinAddress = litecoinAddress || user.litecoinAddress;
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: "Profile updated",
+      user,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
