@@ -281,21 +281,87 @@ WEALTMENT LOGO
 */
 const LOGO_URL = "https://yourdomain.com/logo.png";
 
+
+
+
+
+
 /*
 ========================================
 WELCOME EMAIL
 ========================================
 */
+
 export const sendWelcomeEmail = async (email, name) => {
-await sendEmail({
+
+await resend.emails.send({
+from: process.env.EMAIL_FROM,
 to: email,
-subject: "Welcome to Wealtment",
+subject: "Welcome to X-Drive Academy",
 html: `
-<h2>Welcome ${name}</h2>
-<p>Your account has been created successfully.</p>
-`,
+
+<div style="font-family:Arial; background:#f4f6f8; padding:40px;">
+
+<div style="max-width:600px; margin:auto; background:white; border-radius:8px; overflow:hidden;">
+
+<div style="background:#012169; padding:20px; color:white; text-align:center;">
+<h2>X-Drive Academy</h2>
+</div>
+
+<div style="padding:30px;">
+
+<h2 style="color:#012169;">Welcome ${name}</h2>
+
+<p style="font-size:16px;">
+Your account has been successfully created.
+</p>
+
+<p style="font-size:16px;">
+You can now book driving lessons and make payments easily.
+</p>
+
+<div style="text-align:center; margin-top:30px;">
+<a href="${process.env.FRONTEND_URL}"
+style="background:#C8102E; color:white; padding:12px 20px;
+text-decoration:none; border-radius:5px;">
+Go to Dashboard
+</a>
+</div>
+
+// ${socialFooter}
+
+</div>
+
+<div style="background:#012169; padding:15px; text-align:center; color:white;">
+X-Drive Driving School © ${new Date().getFullYear()}
+</div>
+
+</div>
+
+</div>
+`
 });
 };
+
+
+
+
+
+// /*
+// ========================================
+// WELCOME EMAIL
+// ========================================
+// */
+// export const sendWelcomeEmail = async (email, name) => {
+// await sendEmail({
+// to: email,
+// subject: "Welcome to Wealtment",
+// html: `
+// <h2>Welcome ${name}</h2>
+// <p>Your account has been created successfully.</p>
+// `,
+// });
+// };
 
 /*
 ========================================
