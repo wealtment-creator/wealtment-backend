@@ -6,7 +6,7 @@ WEALTMENT LOGO
 ========================================
 */
 const LOGO_URL =
- "https://res.cloudinary.com/dauu1z5ds/image/upload/f_auto,q_auto/502FBB5E-180D-4F1F-8E56-ADFD194F74B1_esg7bf";
+ "https://res.cloudinary.com/dauu1z5ds/image/upload/f_auto,q_auto/502FBB5E-180D-4F1F-8E56-ADFD194F74B1_esg7bf.png";
 
 /*
 ========================================
