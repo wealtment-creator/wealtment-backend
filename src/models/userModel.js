@@ -34,6 +34,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    balance: {
+      type: Number,
+      default: 0
+    },
 
     resetPasswordToken: {
       type: String,

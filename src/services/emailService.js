@@ -17,7 +17,7 @@ export const sendWelcomeEmail = async (email, name) => {
  await sendEmail({
  to: email,
  subject: "Welcome to WEALTMENT",
- html: `
+ html: `j
  <div style="background:#0b1320;padding:40px;font-family:Arial">
  <div style="max-width:600px;margin:auto;background:#111827;padding:30px;border-radius:10px">
 

@@ -22,21 +22,11 @@ const depositSchema = new mongoose.Schema(
       required: true,
     },
 
-    debitAmount: {
+    amount: {
       type: Number,
       required: true,
     },
-
-    creditAmount: {
-      type: Number,
-      required: true,
-    },
-
-    profit: {
-      type: Number,
-      required: true,
-    },
-
+    
     status: {
       type: String,
       enum: ["pending", "approved", "rejected"],
