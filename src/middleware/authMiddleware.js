@@ -4,6 +4,8 @@ import User from "../models/userModel.js";
 
 // protect routes
 export const protect = asyncHandler(async (req, res, next) => {
+  console.log("AUTH HEADER:", req.headers.authorization);
+  
 
   let token;
 
