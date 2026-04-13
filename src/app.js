@@ -80,6 +80,10 @@ res.status(500).json({ error: err.message });
 // =======================
 // Health Check
 // =======================
+
+app.get("/api/health", (req, res) =>{
+    res.status(200).json({message: "Server is running"})
+})
 app.get("/", (req, res) => {
 res.json({ message: "Wealthment API running" });
 });
