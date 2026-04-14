@@ -1,5 +1,6 @@
 import User from "../models/userModel.js";
 import Transaction from "../models/transactionModel.js";
+import asyncHandler from "express-async-handler";
 
 /*
 ========================================
@@ -43,25 +44,46 @@ export const deleteUser = async (req, res) => {
   }
 };
 
-/*
-========================================
-USER BEHIND TRANSACTION
-========================================
-*/
+// /*
+// ========================================
+// USER BEHIND TRANSACTION
+// ========================================
+// */
 
-export const transactionUsers = async (req, res) => {
-  try {
-    const transactions = await Transaction.find()
-      .populate("user", "name email balance")
-      .sort({ createdAt: -1 });
+// export const transactionUsers = async (req, res) => {
+//   try {
+//     const transactions = await Transaction.find()
+//       .populate("user", "name email balance")
+//       .sort({ createdAt: -1 });
 
-    res.json({
-      success: true,
-      transactions,
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
-  }
-};
+//     res.json({
+//       success: true,
+//       transactions,
+//     });
+//   } catch (error) {
+//     res.status(500).json({
+//       message: error.message,
+//     });
+//   }
+// };
+
+
+export const fundUser = asyncHandler(async (req, res) => {
+const { amount } = req.body;
+
+const user = await User.findById(req.params.id);
+
+if (!user) {
+res.status(404);
+throw new Error("User not found");
+}
+
+user.balance += Number(amount);
+
+await user.save();
+
+res.json({ message: "User funded successfully" });
+});
+
+
+

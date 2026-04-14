@@ -1,7 +1,7 @@
 import Deposit from "../models/depositModel.js";
 import User from "../models/userModel.js";
 import Transaction from "../models/transactionModel.js";
-
+import asyncHandler from "express-async-handler";
 import {
   sendDepositRequestEmail,
   sendDepositApprovedEmail,
@@ -299,3 +299,22 @@ export const getRecentTransactions = async (req, res) => {
     });
   }
 };
+
+/*
+========================================
+GET ALL DEPOSITS (ADMIN)
+========================================
+*/
+export const getMyDeposits = asyncHandler(async (req, res) => {
+const deposits = await Deposit.find({
+user: req.user._id,
+}).sort({ createdAt: -1 });
+
+res.json(deposits);
+});
+
+
+
+
+
+
