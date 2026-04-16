@@ -56,7 +56,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/admin", adminRoutes);
-app.use("/api/deposit", depositRoutes);
+app.use("/api/depositS", depositRoutes);
 app.use("/api/package", packageRoutes);
 app.use("/api/withdrawals", withdrawalRoutes);
 

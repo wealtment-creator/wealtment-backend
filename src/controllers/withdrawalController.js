@@ -182,17 +182,38 @@ res.json(withdrawals);
 // USER CREATE WITHDRAWAL
 
 export const createWithdrawal = asyncHandler(async (req, res) => {
-const { amount, coin } = req.body;
+const { amount, coinType, walletAddress } = req.body;
+
+// validate
+if (!amount || !coinType || !walletAddress) {
+res.status(400);
+throw new Error("All fields are required");
+}
+
+const user = await User.findById(req.user._id);
+
+if (!user) {
+res.status(404);
+throw new Error("User not found");
+}
+
+// check balance
+if (user.balance < amount) {
+res.status(400);
+throw new Error("Insufficient balance");
+}
 
 const withdrawal = await Withdrawal.create({
 user: req.user._id,
 amount,
-coin,
+coinType, // ✅ FIXED
+walletAddress, // ✅ FIXED
 status: "pending",
 });
 
 res.status(201).json(withdrawal);
 });
+
 
 
 
