@@ -315,6 +315,16 @@ res.json(deposits);
 
 
 
+export const getAllDeposits = asyncHandler(async (req, res) => {
+const deposits = await Deposit.find()
+.populate("user", "name email")
+.sort({ createdAt: -1 });
+
+res.json(deposits);
+});
+
+
+
 
 
 

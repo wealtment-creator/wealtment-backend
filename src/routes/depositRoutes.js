@@ -6,6 +6,7 @@ import {
   rejectDeposit,
   getRecentTransactions,
   getMyDeposits,
+  getAllDeposits,
 } from "../controllers/depositController.js";
 
 import { protect, adminOnly } from "../middleware/authMiddleware.js";
@@ -28,7 +29,7 @@ router.put("/reject/:id", protect, adminOnly, rejectDeposit);
 router.get("/recent-transactions", protect, adminOnly, getRecentTransactions);
 
 // ADMIN - get all deposits
-// router.get("/", protect, adminOnly, getAllDeposits);
+router.get("/", protect, adminOnly, getAllDeposits);
 router.get("/my", protect, getMyDeposits);
 
 export default router;
