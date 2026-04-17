@@ -10,6 +10,7 @@ import adminRoutes from "./routes/adminRoutes.js";
 import depositRoutes from "./routes/depositRoutes.js";
 import packageRoutes from "./routes/packageRoutes.js";
 import withdrawalRoutes from "./routes/withdrawalRoutes.js";
+import investmentRoutes from "./routes/investmentRoutes.js";
 
 // Utils
 import { sendEmail } from "./utils/resend.js";
@@ -59,6 +60,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/deposits", depositRoutes);
 app.use("/api/package", packageRoutes);
 app.use("/api/withdrawals", withdrawalRoutes);
+app.use("/api/investments", investmentRoutes);
 
 // =======================
 // Test Email Route

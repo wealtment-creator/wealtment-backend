@@ -199,3 +199,17 @@ export const resetPassword = asyncHandler(async (req, res) => {
     message: "Password reset successful",
   });
 });
+
+
+
+// //// LOGOUT
+
+
+export const logoutUser = asyncHandler(async (req, res) => {
+res.status(200).json({
+success: true,
+message: "Logout successful. Please remove token from client storage.",
+});
+});
+
+

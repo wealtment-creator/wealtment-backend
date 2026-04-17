@@ -5,7 +5,8 @@ import {
   getDepositHistory,
   getLastDeposit,
   getTotalDeposit,
-  updateProfile,
+  // updateProfile,
+  updateUserProfile,
 } from "../controllers/userController.js";
 
 import { protect } from "../middleware/authMiddleware.js";
@@ -20,6 +21,8 @@ router.get("/last-deposit", protect, getLastDeposit);
 
 router.get("/total-deposit", protect, getTotalDeposit);
 
-router.put("/update-profile", protect, updateProfile);
+// router.put("/update-profile", protect, updateProfile);
+
+router.put("/profile", protect, updateUserProfile);
 
 export default router;
