@@ -87,3 +87,43 @@ res.json({ message: "User funded successfully" });
 
 
 
+
+/*
+========================================
+ADMIN - GET ALL ACTIVE INVESTMENTS
+========================================
+*/
+export const getAllActiveInvestments = asyncHandler(async (req, res) => {
+const investments = await Investment.find({
+status: "active",
+})
+.populate("user", "name email")
+.populate("package", "name price profitPercentage duration")
+.sort({ createdAt: -1 });
+
+const now = new Date();
+
+// add live profit + progress
+const formatted = investments.map((inv) => {
+const progress =
+(now - inv.startDate) / (inv.endDate - inv.startDate);
+
+const currentProfit =
+inv.totalProfit * Math.min(progress, 1);
+
+return {
+...inv._doc,
+currentProfit: Math.max(0, currentProfit),
+progress: Math.min(progress * 100, 100), // percentage %
+};
+});
+
+res.json(formatted);
+});
+
+
+
+
+
+
+

@@ -213,3 +213,31 @@ message: "Logout successful. Please remove token from client storage.",
 });
 
 
+
+
+/*
+========================================
+GET CURRENT USER (CHECK ACTIVE SESSION)
+========================================
+*/
+export const getMe = asyncHandler(async (req, res) => {
+const user = await User.findById(req.user._id).select("-password");
+
+if (!user) {
+res.status(404);
+throw new Error("User not found");
+}
+
+res.json({
+_id: user._id,
+name: user.name,
+email: user.email,
+role: user.role,
+balance: user.balance || 0,
+});
+});
+
+
+
+
+

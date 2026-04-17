@@ -52,3 +52,9 @@ user: req.user._id,
 res.json(investments);
 });
 
+
+
+
+
+
+
