@@ -6,7 +6,9 @@ import {
   getLastDeposit,
   getTotalDeposit,
   // updateProfile,
+  getUserProfile,
   updateUserProfile,
+  
   changePassword,
 } from "../controllers/userController.js";
 
@@ -25,6 +27,7 @@ router.get("/total-deposit", protect, getTotalDeposit);
 // router.put("/update-profile", protect, updateProfile);
 
 router.put("/profile", protect, updateUserProfile);
+router.get("/profile", protect, getUserProfile);
 router.put("/change-password", protect, changePassword);
 
 export default router;

@@ -1,12 +1,14 @@
 import Investment from "../models/investmentModel.js"
 import asyncHandler from "express-async-handler";
-// import Investment from "../models/investmentModel.js"
-// import asyncHandler from "express-async-handler";
-// import Investment from "../models/investmentModel.js";
 import Package from "../models/packageModel.js";
 
 export const createInvestment = asyncHandler(async (req, res) => {
  const { packageId, amount } = req.body;
+
+ if (!packageId || !amount) {
+ res.status(400);
+ throw new Error("packageId and amount are required");
+ }
 
  const pkg = await Package.findById(packageId);
 
@@ -15,10 +17,18 @@ export const createInvestment = asyncHandler(async (req, res) => {
  throw new Error("Package not found");
  }
 
- // calculate duration (assume days)
+ // VERY IMPORTANT FIX
  const durationDays = parseInt(pkg.duration);
+
+ if (isNaN(durationDays)) {
+ res.status(400);
+ throw new Error("Invalid package duration. Must be a number.");
+ }
+
+ const startDate = new Date();
+
  const endDate = new Date();
- endDate.setDate(endDate.getDate() + durationDays);
+ endDate.setDate(startDate.getDate() + durationDays);
 
  const totalProfit = (amount * pkg.profitPercentage) / 100;
 
@@ -28,13 +38,15 @@ export const createInvestment = asyncHandler(async (req, res) => {
  amount,
  profitPercentage: pkg.profitPercentage,
  totalProfit,
- startDate: new Date(),
+ startDate,
  endDate,
  });
 
- res.status(201).json(investment);
+ res.status(201).json({
+ success: true,
+ investment,
+ });
 });
-
 
 export const getMyInvestments = asyncHandler(async (req, res) => {
 const investments = await Investment.find({

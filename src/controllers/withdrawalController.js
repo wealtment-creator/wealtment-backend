@@ -176,9 +176,6 @@ user: req.user._id,
 res.json(withdrawals);
 });
 
-
-
-
 // USER CREATE WITHDRAWAL
 
 export const createWithdrawal = asyncHandler(async (req, res) => {

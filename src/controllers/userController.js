@@ -225,6 +225,29 @@ message: "Password updated successfully",
 
 
 
+export const getUserProfile = asyncHandler(async (req, res) => {
+ const user = await User.findById(req.user._id).select("-password");
+
+ if (!user) {
+ res.status(404);
+ throw new Error("User not found");
+ }
+
+ res.json({
+ _id: user._id,
+ name: user.name,
+ email: user.email,
+ role: user.role,
+ balance: user.balance || 0,
+ bitcoinAddress: user.bitcoinAddress || "",
+ litecoinAddress: user.litecoinAddress || "",
+ });
+});
+
+
+
+
+
 
 
 
