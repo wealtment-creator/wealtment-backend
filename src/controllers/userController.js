@@ -211,8 +211,7 @@ throw new Error("Current password is incorrect");
 }
 
 // Hash new password
-const salt = await bcrypt.genSalt(10);
-user.password = await bcrypt.hash(newPassword, salt);
+user.password = newPassword;
 
 await user.save();
 
