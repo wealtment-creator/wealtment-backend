@@ -1,6 +1,7 @@
 import User from "../models/userModel.js";
 import Transaction from "../models/transactionModel.js";
 import asyncHandler from "express-async-handler";
+import Investment from "../models/investmentModel.js"
 
 /*
 ========================================
@@ -98,23 +99,31 @@ const investments = await Investment.find({
 status: "active",
 })
 .populate("user", "name email")
-.populate("package", "name price profitPercentage duration")
+.populate("package", "name minimumDeposit maximumDeposit profitPercentage duration")
 .sort({ createdAt: -1 });
 
 const now = new Date();
 
-// add live profit + progress
 const formatted = investments.map((inv) => {
-const progress =
-(now - inv.startDate) / (inv.endDate - inv.startDate);
+if (!inv.startDate || !inv.endDate) {
+return inv; // avoid crash
+}
+
+const totalDuration = inv.endDate - inv.startDate;
+
+if (totalDuration <= 0) {
+return inv; // avoid divide-by-zero crash
+}
+
+const progress = (now - inv.startDate) / totalDuration;
 
 const currentProfit =
-inv.totalProfit * Math.min(progress, 1);
+(inv.totalProfit || 0) * Math.min(progress, 1);
 
 return {
 ...inv._doc,
 currentProfit: Math.max(0, currentProfit),
-progress: Math.min(progress * 100, 100), // percentage %
+progress: Math.min(progress * 100, 100),
 };
 });
 

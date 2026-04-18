@@ -1,5 +1,6 @@
 import Investment from "../models/investmentModel.js"
 import asyncHandler from "express-async-handler";
+// import Investment from "../models/investmentModel.js"
 
 export const createInvestment = asyncHandler(async (req, res) => {
  const { packageId } = req.body;
