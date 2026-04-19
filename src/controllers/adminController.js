@@ -70,8 +70,15 @@ export const deleteUser = async (req, res) => {
 
 
 export const fundUser = asyncHandler(async (req, res) => {
-const { amount } = req.body;
+const { amount, withdrawalId } = req.body;
 
+// 1. Validate amount
+if (!amount || isNaN(amount)) {
+res.status(400);
+throw new Error("Valid amount is required");
+}
+
+// 2. Find user
 const user = await User.findById(req.params.id);
 
 if (!user) {
@@ -79,12 +86,43 @@ res.status(404);
 throw new Error("User not found");
 }
 
+// 3. Add balance
 user.balance += Number(amount);
-
 await user.save();
 
-res.json({ message: "User funded successfully" });
+let updatedWithdrawal = null;
+
+// 4. OPTIONAL: If this funding is for a withdrawal, update it
+if (withdrawalId) {
+const withdrawal = await Withdrawal.findById(withdrawalId);
+
+if (!withdrawal) {
+res.status(404);
+throw new Error("Withdrawal not found");
+}
+
+if (withdrawal.status !== "pending") {
+res.status(400);
+throw new Error("Withdrawal already processed");
+}
+
+withdrawal.status = "approved";
+withdrawal.isCredited = true;
+withdrawal.approvedBy = req.user._id;
+withdrawal.approvedAt = new Date();
+
+await withdrawal.save();
+
+updatedWithdrawal = withdrawal;
+}
+
+res.json({
+message: "User funded successfully",
+userBalance: user.balance,
+withdrawal: updatedWithdrawal,
 });
+});
+
 
 
 

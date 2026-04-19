@@ -145,13 +145,25 @@ res.status(404);
 throw new Error("Withdrawal not found");
 }
 
+if (withdrawal.status !== "pending") {
+res.status(400);
+throw new Error("Already processed");
+}
+
+// ✅ mark as paid
 withdrawal.status = "approved";
-withdrawal.isCredited = true; // important flag
+withdrawal.isCredited = true;
+withdrawal.approvedAt = new Date();
+withdrawal.approvedBy = req.user._id;
 
 await withdrawal.save();
 
-res.json({ message: "Withdrawal approved & credited" });
+res.json({
+message: "Withdrawal marked as PAID successfully",
+withdrawal,
 });
+});
+
 
 
 
