@@ -15,7 +15,7 @@ USER
 */
 
 router.post("/", protect, createWithdrawal);
-
+router.get("/", protect, adminOnly, getAllWithdrawals);
 /*
 ADMIN
 */
@@ -23,9 +23,6 @@ ADMIN
 // router.put("/approve/:id", protect, adminOnly, approveWithdrawal);
 
 router.put("/approve/:id", protect, adminOnly, approveWithdrawal);
-router.get("/", protect, adminOnly, getAllWithdrawals);
-router.post("/", protect, createWithdrawal);
-
-// router.get("/my", protect, getMyWithdrawals);
+router.get("/my", protect, getMyWithdrawals);
 
 export default router;

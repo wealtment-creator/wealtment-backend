@@ -138,7 +138,7 @@ ADMIN APPROVE WITHDRAWAL
 // ADMIN APPROVE ALL WITHDRAWLS
 
 export const approveWithdrawal = asyncHandler(async (req, res) => {
-const withdrawal = await Withdrawal.findById(req.params.id);
+const withdrawal = await Withdrawal.findById(req.params.id).populate("user");
 
 if (!withdrawal) {
 res.status(404);
@@ -150,7 +150,19 @@ res.status(400);
 throw new Error("Already processed");
 }
 
-// ✅ mark as paid
+const user = withdrawal.user;
+
+// ✅ CHECK BALANCE
+if (user.balance < withdrawal.amount) {
+res.status(400);
+throw new Error("Insufficient user balance");
+}
+
+// ✅ DEDUCT BALANCE
+user.balance -= withdrawal.amount;
+await user.save();
+
+// ✅ UPDATE STATUS
 withdrawal.status = "approved";
 withdrawal.isCredited = true;
 withdrawal.approvedAt = new Date();
@@ -159,11 +171,10 @@ withdrawal.approvedBy = req.user._id;
 await withdrawal.save();
 
 res.json({
-message: "Withdrawal marked as PAID successfully",
+message: "Withdrawal approved & balance deducted",
 withdrawal,
 });
 });
-
 
 
 

@@ -236,6 +236,8 @@ export const getUserProfile = asyncHandler(async (req, res) => {
  email: user.email,
  role: user.role,
  balance: user.balance || 0,
+ referralBalance: user.referralEarnings,
+ totalBalance: user.balance + user.referralEarnings,
  bitcoinAddress: user.bitcoinAddress || "",
  litecoinAddress: user.litecoinAddress || "",
  });
@@ -265,6 +267,46 @@ referrals,
 });
 });
 
+/*
+========================================
+TRANSFER REFERRAL EARNINGS TO WALLET
+========================================
+*/
+export const transferReferralToWallet = asyncHandler(async (req, res) => {
+const { amount } = req.body;
+
+if (!amount || amount <= 0) {
+res.status(400);
+throw new Error("Valid amount is required");
+}
+
+const user = await User.findById(req.user._id);
+
+if (!user) {
+res.status(404);
+throw new Error("User not found");
+}
+
+// check referral balance
+if (user.referralEarnings < amount) {
+res.status(400);
+throw new Error("Insufficient referral balance");
+}
+
+// deduct from referral earnings
+user.referralEarnings -= amount;
+
+// add to main balance
+user.balance += amount;
+
+await user.save();
+
+res.json({
+message: "Transfer successful",
+balance: user.balance,
+referralBalance: user.referralEarnings,
+});
+});
 
 
 

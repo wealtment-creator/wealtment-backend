@@ -10,6 +10,7 @@ import {
   updateUserProfile,
   changePassword,
   getMyReferrals,
+  transferReferralToWallet,
 } from "../controllers/userController.js";
 
 import { protect } from "../middleware/authMiddleware.js";
@@ -30,5 +31,5 @@ router.put("/profile", protect, updateUserProfile);
 router.get("/profile", protect, getUserProfile);
 router.put("/change-password", protect, changePassword);
 router.get("/referrals", protect, getMyReferrals)
-
+router.post("/transfer-referral", protect, transferReferralToWallet)
 export default router;
