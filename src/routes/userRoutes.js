@@ -8,8 +8,8 @@ import {
   // updateProfile,
   getUserProfile,
   updateUserProfile,
-  
   changePassword,
+  getMyReferrals,
 } from "../controllers/userController.js";
 
 import { protect } from "../middleware/authMiddleware.js";
@@ -29,5 +29,6 @@ router.get("/total-deposit", protect, getTotalDeposit);
 router.put("/profile", protect, updateUserProfile);
 router.get("/profile", protect, getUserProfile);
 router.put("/change-password", protect, changePassword);
+router.get("/referrals", protect, getMyReferrals)
 
 export default router;

@@ -169,6 +169,15 @@ res.json(formatted);
 });
 
 
+export const getAllReferrals = asyncHandler(async (req, res) => {
+const users = await User.find({ referredBy: { $ne: null } })
+.populate("referredBy", "name email")
+.select("name email referralEarnings");
+
+res.json(users);
+});
+
+
 
 
 

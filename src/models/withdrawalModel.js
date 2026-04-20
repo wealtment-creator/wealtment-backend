@@ -42,6 +42,10 @@ const withdrawalSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    isCredited: {
+      type: Boolean,
+      default: false,
+    },
 
     approvedAt: Date,
   },

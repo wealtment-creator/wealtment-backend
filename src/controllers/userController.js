@@ -222,9 +222,6 @@ message: "Password updated successfully",
 
 
 
-
-
-
 export const getUserProfile = asyncHandler(async (req, res) => {
  const user = await User.findById(req.user._id).select("-password");
 
@@ -243,6 +240,31 @@ export const getUserProfile = asyncHandler(async (req, res) => {
  litecoinAddress: user.litecoinAddress || "",
  });
 });
+
+
+/*
+========================================
+GET MY REFERRALS + EARNINGS
+========================================
+*/
+export const getMyReferrals = asyncHandler(async (req, res) => {
+const userId = req.user._id;
+
+// Find users referred by this user
+const referrals = await User.find({ referredBy: userId })
+.select("name email createdAt hasInvested")
+.sort({ createdAt: -1 });
+
+// Get current user for earnings
+const user = await User.findById(userId);
+
+res.json({
+totalReferrals: referrals.length,
+totalEarnings: user.referralEarnings,
+referrals,
+});
+});
+
 
 
 

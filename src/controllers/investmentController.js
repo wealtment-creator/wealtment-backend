@@ -1,6 +1,7 @@
 import Investment from "../models/investmentModel.js"
 import asyncHandler from "express-async-handler";
 import Package from "../models/packageModel.js";
+import User from "../models/userModel.js";
 
 export const createInvestment = asyncHandler(async (req, res) => {
  const { packageId, amount } = req.body;
@@ -41,6 +42,32 @@ export const createInvestment = asyncHandler(async (req, res) => {
  startDate,
  endDate,
  });
+
+ /*
+ ========================================
+ REFERRAL BONUS LOGIC (SAFE ADDITION)
+ ========================================
+ */
+ const user = await User.findById(req.user._id);
+
+ if (!user.hasInvested) {
+ if (user.referredBy) {
+ const referrer = await User.findById(user.referredBy);
+
+ if (referrer) {
+ const bonus = amount * 0.1; // 10%
+
+ referrer.balance += bonus;
+ referrer.referralEarnings += bonus;
+
+ await referrer.save();
+ }
+ }
+
+ // mark user as having invested
+ user.hasInvested = true;
+ await user.save();
+ }
 
  res.status(201).json({
  success: true,

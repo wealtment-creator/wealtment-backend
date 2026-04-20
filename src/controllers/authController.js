@@ -15,6 +15,11 @@ import generateToken from "../utils/generateToken.js";
 import jwt from "jsonwebtoken";
 import { sendWelcomeEmail } from "../services/emailService.js";
 
+
+const generateReferralCode = () => {
+ return Math.random().toString(36).substring(2, 8);
+};
+
 /*
 ========================================
 SIGNUP
@@ -22,7 +27,14 @@ SIGNUP
 POST /api/auth/signup
 */
 export const signup = asyncHandler(async (req, res) => {
- const { name, email, password, bitcoinAddress, litecoinAddress } = req.body;
+ const {
+ name,
+ email,
+ password,
+ bitcoinAddress,
+ litecoinAddress,
+ referralCode,
+ } = req.body;
 
  // Validate required fields
  if (!name || !email || !password) {
@@ -44,13 +56,37 @@ export const signup = asyncHandler(async (req, res) => {
  throw new Error("User already exists");
  }
 
- // Create new user
+ /*
+ ========================================
+ REFERRAL LOOKUP (SAFE + OPTIONAL)
+ ========================================
+ */
+ let referrer = null;
+
+ if (referralCode && referralCode.trim() !== "") {
+ referrer = await User.findOne({ referralCode });
+
+ if (!referrer) {
+ res.status(400);
+ throw new Error("Invalid referral code");
+ }
+ }
+
+ /*
+ ========================================
+ CREATE USER (UPDATED)
+ ========================================
+ */
  const user = await User.create({
  name,
  email,
  password,
  bitcoinAddress: bitcoinAddress || "",
  litecoinAddress: litecoinAddress || "",
+
+ // NEW (safe additions)
+ referralCode: generateReferralCode(),
+ referredBy: referrer ? referrer._id : null,
  });
 
  /*
@@ -70,6 +106,11 @@ export const signup = asyncHandler(async (req, res) => {
  name: user.name,
  email: user.email,
  role: user.role,
+
+ // expose referral info (important)
+ referralCode: user.referralCode,
+ referredBy: user.referredBy,
+
  token: generateToken(user._id),
  });
 });

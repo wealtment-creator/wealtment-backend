@@ -2,50 +2,76 @@ import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
 const userSchema = new mongoose.Schema(
-  {
-    name: {
-      type: String,
-      required: true,
-    },
+ {
+ name: {
+ type: String,
+ required: true,
+ },
 
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-    },
+ email: {
+ type: String,
+ required: true,
+ unique: true,
+ },
 
-    password: {
-      type: String,
-      required: true,
-    },
+ password: {
+ type: String,
+ required: true,
+ },
 
-    role: {
-      type: String,
-      enum: ["user", "admin"],
-      default: "user",
-    },
+ role: {
+ type: String,
+ enum: ["user", "admin"],
+ default: "user",
+ },
 
-    bitcoinAddress: {
-      type: String,
-      default: "",
-    },
+ bitcoinAddress: {
+ type: String,
+ default: "",
+ },
 
-    litecoinAddress: {
-      type: String,
-      default: "",
-    },
-    balance: {
-      type: Number,
-      default: 0
-    },
+ litecoinAddress: {
+ type: String,
+ default: "",
+ },
 
-    resetPasswordToken: {
-      type: String,
-    },
-  },
-  {
-    timestamps: true,
-  }
+ balance: {
+ type: Number,
+ default: 0,
+ },
+
+ // =========================
+ // REFERRAL SYSTEM (ADDED)
+ // =========================
+
+ referralCode: {
+ type: String,
+ unique: true,
+ },
+
+ referredBy: {
+ type: mongoose.Schema.Types.ObjectId,
+ ref: "User",
+ default: null,
+ },
+
+ hasInvested: {
+ type: Boolean,
+ default: false,
+ },
+
+ referralEarnings: {
+ type: Number,
+ default: 0,
+ },
+
+ resetPasswordToken: {
+ type: String,
+ },
+ },
+ {
+ timestamps: true,
+ }
 );
 
 /*
@@ -54,10 +80,10 @@ HASH PASSWORD BEFORE SAVE
 ========================================
 */
 userSchema.pre("save", async function () {
-  if (!this.isModified("password")) return;
+ if (!this.isModified("password")) return;
 
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
+ const salt = await bcrypt.genSalt(10);
+ this.password = await bcrypt.hash(this.password, salt);
 });
 
 /*
@@ -66,7 +92,7 @@ COMPARE PASSWORD
 ========================================
 */
 userSchema.methods.matchPassword = async function (enteredPassword) {
-  return bcrypt.compare(enteredPassword, this.password);
+ return bcrypt.compare(enteredPassword, this.password);
 };
 
 const User = mongoose.model("User", userSchema);
