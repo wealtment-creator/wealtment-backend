@@ -17,7 +17,7 @@ export const sendWelcomeEmail = async (email, name) => {
  await sendEmail({
  to: email,
  subject: "Welcome to WEALTMENT",
- html: `j
+ html: `
  <div style="background:#0b1320;padding:40px;font-family:Arial">
  <div style="max-width:600px;margin:auto;background:#111827;padding:30px;border-radius:10px">
 
@@ -190,4 +190,119 @@ export const sendWithdrawalApprovedEmail = async (email, name, amount, coin) => 
  </div>
  `,
  });
+};
+
+
+/*
+========================================
+PASSWORD RESET EMAIL
+========================================
+*/
+export const sendPasswordResetEmail = async (email, name, resetLink) => {
+await sendEmail({
+to: email,
+subject: "Password Reset - WEALTMENT",
+html: `
+<div style="background:#0b1320;padding:40px;font-family:Arial">
+<div style="max-width:600px;margin:auto;background:#111827;padding:30px;border-radius:10px">
+
+<div style="text-align:center">
+<img src="${LOGO_URL}" width="150"/>
+</div>
+
+<h2 style="color:#facc15;text-align:center">Reset Your Password</h2>
+
+<p style="color:white;">Hello ${name},</p>
+<p style="color:white;">Click the button below to reset your password:</p>
+
+<a href="${resetLink}"
+style="display:inline-block;margin-top:20px;padding:12px 20px;background:#facc15;color:black;border-radius:5px;text-decoration:none;">
+Reset Password
+</a>
+
+</div>
+</div>
+`,
+});
+};
+
+/*
+========================================
+PASSWORD CHANGED EMAIL
+========================================
+*/
+export const sendPasswordChangedEmail = async (email, name) => {
+await sendEmail({
+to: email,
+subject: "Password Changed - WEALTMENT",
+html: `
+<div style="background:#0b1320;padding:40px;font-family:Arial">
+<div style="max-width:600px;margin:auto;background:#111827;padding:30px;border-radius:10px">
+
+<div style="text-align:center">
+<img src="${LOGO_URL}" width="150"/>
+</div>
+
+<h2 style="color:#22c55e;text-align:center">Password Updated</h2>
+
+<p style="color:white;">Hello ${name},</p>
+<p style="color:white;">Your password has been changed successfully.</p>
+
+</div>
+</div>
+`,
+});
+};
+
+/*
+========================================
+ADMIN: NEW SIGNUP
+========================================
+*/
+export const sendAdminNewSignupEmail = async (name, email) => {
+await sendEmail({
+to: process.env.ADMIN_EMAIL,
+subject: "New User Signup",
+html: `
+<p>New user registered:</p>
+<p>Name: ${name}</p>
+<p>Email: ${email}</p>
+`,
+});
+};
+
+/*
+========================================
+ADMIN: NEW DEPOSIT REQUEST
+========================================
+*/
+export const sendAdminDepositRequestEmail = async (name, email, amount) => {
+await sendEmail({
+to: process.env.ADMIN_EMAIL,
+subject: "New Deposit Request",
+html: `
+<p>User submitted deposit:</p>
+<p>Name: ${name}</p>
+<p>Email: ${email}</p>
+<p>Amount: $${amount}</p>
+`,
+});
+};
+
+/*
+========================================
+ADMIN: NEW WITHDRAWAL REQUEST
+========================================
+*/
+export const sendAdminWithdrawalRequestEmail = async (name, email, amount) => {
+await sendEmail({
+to: process.env.ADMIN_EMAIL,
+subject: "New Withdrawal Request",
+html: `
+<p>User requested withdrawal:</p>
+<p>Name: ${name}</p>
+<p>Email: ${email}</p>
+<p>Amount: $${amount}</p>
+`,
+});
 };

@@ -1,19 +1,8 @@
-// import asyncHandler from "express-async-handler";
-// import User from "../models/userModel.js";
-// import generateToken from "../utils/generateToken.js";
-// import jwt from "jsonwebtoken";
-// import bcrypt from "bcryptjs";
-// import { sendEmail } from "../utils/resend.js";
-
-// import asyncHandler from "express-async-handler";
-// import User from "../models/userModel.js";
-// import generateToken from "../utils/generateToken.js";
-// import { sendEmail } from "../services/emailService.js";
 import asyncHandler from "express-async-handler";
 import User from "../models/userModel.js";
 import generateToken from "../utils/generateToken.js";
 import jwt from "jsonwebtoken";
-import { sendWelcomeEmail } from "../services/emailService.js";
+import { sendWelcomeEmail, sendPasswordResetEmail, sendPasswordChangedEmail } from "../services/emailService.js";
 
 
 const generateReferralCode = () => {
@@ -94,11 +83,13 @@ export const signup = asyncHandler(async (req, res) => {
  SEND WELCOME EMAIL
  ========================================
  */
- try {
- await sendWelcomeEmail(email, name);
- } catch (error) {
- console.log("Email error:", error.message);
- }
+try {
+await sendWelcomeEmail(email, name);
+await sendAdminNewSignupEmail(name, email); // ✅ NEW
+} catch (error) {
+console.log("Email error:", error.message);
+}
+
 
  // Respond with user data and token
  res.status(201).json({
@@ -187,11 +178,12 @@ export const forgotPassword = asyncHandler(async (req, res) => {
     <a href="${resetLink}">${resetLink}</a>
   `;
 
-  await sendEmail({
-    to: user.email,
-    subject: "Password Reset Request",
-    html,
-  });
+try {
+await sendPasswordResetEmail(user.email, user.name, resetLink);
+} catch (error) {
+console.log("Email error:", error.message);
+}
+
 
   res.json({
     message: "Reset link sent to email",
@@ -235,6 +227,12 @@ export const resetPassword = asyncHandler(async (req, res) => {
   user.resetPasswordToken = undefined;
 
   await user.save();
+  try {
+await sendPasswordChangedEmail(user.email, user.name);
+} catch (error) {
+console.log("Email error:", error.message);
+}
+
 
   res.json({
     message: "Password reset successful",

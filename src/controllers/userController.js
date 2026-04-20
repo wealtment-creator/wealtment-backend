@@ -2,6 +2,9 @@ import User from "../models/userModel.js";
 import Deposit from "../models/depositModel.js";
 import asyncHandler from "express-async-handler";
 import bcrypt from "bcryptjs";
+import {
+sendPasswordChangedEmail,
+} from "../services/emailService.js";
 
 /*
 ========================================
@@ -122,31 +125,6 @@ UPDATE PROFILE
 ========================================
 */
 
-// export const updateProfile = async (req, res) => {
-//   try {
-//     const { name, bitcoinAddress, litecoinAddress } = req.body;
-
-//     const user = await User.findById(req.user.id);
-
-//     user.name = name || user.name;
-//     user.bitcoinAddress = bitcoinAddress || user.bitcoinAddress;
-//     user.litecoinAddress = litecoinAddress || user.litecoinAddress;
-
-//     await user.save();
-
-//     res.json({
-//       success: true,
-//       message: "Profile updated",
-//       user,
-//     });
-//   } catch (error) {
-//     res.status(500).json({
-//       message: error.message,
-//     });
-//   }
-// };
-
-
 export const updateUserProfile = asyncHandler(async (req, res) => {
  const user = await User.findById(req.user._id);
 
@@ -214,6 +192,12 @@ throw new Error("Current password is incorrect");
 user.password = newPassword;
 
 await user.save();
+try {
+await sendPasswordChangedEmail(user.email, user.name);
+} catch (error) {
+console.log("Email error:", error.message);
+}
+
 
 res.json({
 message: "Password updated successfully",
