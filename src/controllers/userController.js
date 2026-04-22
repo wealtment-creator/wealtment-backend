@@ -257,9 +257,7 @@ TRANSFER REFERRAL EARNINGS TO WALLET
 ========================================
 */
 export const transferReferralToWallet = asyncHandler(async (req, res) => {
-const { amount } = req.body;
-
-const amountNumber = Number(amount); // ✅ FIX
+const amountNumber = Number(req.body.amount);
 
 if (!amountNumber || amountNumber <= 0) {
 res.status(400);
@@ -273,24 +271,25 @@ res.status(404);
 throw new Error("User not found");
 }
 
-// check referral balance
 if (user.referralEarnings < amountNumber) {
 res.status(400);
 throw new Error("Insufficient referral balance");
 }
 
-// deduct from referral earnings
-user.referralEarnings -= amountNumber;
+await User.findByIdAndUpdate(req.user._id, {
+$inc: {
+balance: amountNumber,
+referralEarnings: -amountNumber,
+},
+});
 
-// add to main balance (FIXED)
-user.balance += amountNumber;
-
-await user.save();
+const updatedUser = await User.findById(req.user._id);
 
 res.json({
 message: "Transfer successful",
-balance: user.balance,
-referralBalance: user.referralEarnings,
+balance: updatedUser.balance,
+referralBalance: updatedUser.referralEarnings,
 });
 });
+
 
