@@ -10,19 +10,23 @@ LIST USERS
 */
 
 export const getUsers = async (req, res) => {
-  try {
-    const users = await User.find();
+try {
+const users = await User.find()
+.select("-password") // ❌ never expose password
+.sort({ createdAt: -1 });
 
-    res.json({
-      success: true,
-      users,
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
-  }
+res.json({
+success: true,
+count: users.length,
+users,
+});
+} catch (error) {
+res.status(500).json({
+message: error.message,
+});
+}
 };
+
 
 /*
 ========================================
@@ -176,6 +180,22 @@ const users = await User.find({ referredBy: { $ne: null } })
 
 res.json(users);
 });
+
+
+
+export const getAllDeposits = asyncHandler(async (req, res) => {
+const deposits = await Deposit.find()
+.populate("user", "name email")
+.sort({ createdAt: -1 });
+
+res.json({
+success: true,
+count: deposits.length,
+deposits,
+});
+});
+
+
 
 
 
