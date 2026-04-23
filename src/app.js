@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import connectDB from "./config/db.js";
+import "./cron/investmentCron.js"
 
 // Routes
 import authRoutes from "./routes/authRoutes.js";
@@ -12,6 +13,7 @@ import packageRoutes from "./routes/packageRoutes.js";
 import withdrawalRoutes from "./routes/withdrawalRoutes.js";
 import investmentRoutes from "./routes/investmentRoutes.js";
 import contactRoutes from "./routes/contactRoutes.js";
+
 
 // Utils
 import { sendEmail } from "./utils/resend.js";
