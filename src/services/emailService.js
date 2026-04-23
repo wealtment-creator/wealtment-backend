@@ -306,3 +306,48 @@ html: `
 `,
 });
 };
+/*
+========================================
+ADMIN: NEW CONTACT MESSAGE
+========================================
+*/
+export const sendAdminContactEmail = async (email, phone, message) => {
+await sendEmail({
+to: process.env.ADMIN_EMAIL,
+subject: "New Contact Message - WEALTMENT",
+html: `
+<div style="background:#0b1320;padding:40px;font-family:Arial">
+<div style="max-width:600px;margin:auto;background:#111827;padding:30px;border-radius:10px">
+
+<!-- Logo -->
+<div style="text-align:center">
+<img src="${LOGO_URL}" width="150" alt="Wealtment Logo"/>
+</div>
+
+<!-- Header -->
+<h2 style="color:#facc15;text-align:center">
+New Contact Message
+</h2>
+
+<!-- Body -->
+<p style="color:white;">
+A new contact message was submitted on WEALTMENT.
+</p>
+
+<div style="background:#1f2937;padding:20px;border-radius:8px">
+<p style="color:white;"><strong>Email:</strong> ${email}</p>
+<p style="color:white;"><strong>Phone:</strong> ${phone || "Not provided"}</p>
+<p style="color:white;"><strong>Message:</strong></p>
+<p style="color:white;">${message}</p>
+</div>
+
+<!-- Footer -->
+<p style="color:#9ca3af; margin-top:30px; font-size:14px; text-align:center;">
+&copy; ${new Date().getFullYear()} WEALTMENT. All rights reserved.
+</p>
+
+</div>
+</div>
+`,
+});
+};
