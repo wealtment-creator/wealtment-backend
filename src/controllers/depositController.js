@@ -50,7 +50,6 @@ res.status(500).json({ message: error.message });
 ADMIN APPROVE DEPOSIT
 ========================================
 */
-
 export const approveDeposit = async (req, res) => {
 try {
 const deposit = await Deposit.findById(req.params.id);
@@ -62,46 +61,39 @@ message: "Deposit not found",
 });
 }
 
+console.log("Before update:", deposit);
+
 if (deposit.status !== "pending") {
 return res.status(400).json({
 message: "Already processed",
 });
 }
 
-// 1. UPDATE USER BALANCE IMMEDIATELY
 await User.findByIdAndUpdate(deposit.user, {
 $inc: { balance: deposit.amount },
 });
 
-// 2. UPDATE DEPOSIT STATUS
 deposit.status = "approved";
 deposit.approvedBy = req.user.id;
 deposit.approvedAt = new Date();
 
 await deposit.save();
-const user = await User.findById(deposit.user); // ✅ NEW
 
-try {
-await sendDepositApprovedEmail(user.email, user.name, deposit.amount, deposit.coinType);
-} catch (error) {
-console.log("Email error:", error.message);
-}
-
+console.log("After update:", deposit);
 
 return res.json({
 success: true,
 message: "Deposit approved and balance updated",
+deposit,
 });
-
 } catch (error) {
+console.log(error);
 return res.status(500).json({
 success: false,
 message: error.message,
 });
 }
 };
-
-
 
 /*
 ========================================
