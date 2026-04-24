@@ -13,6 +13,7 @@ import packageRoutes from "./routes/packageRoutes.js";
 import withdrawalRoutes from "./routes/withdrawalRoutes.js";
 import investmentRoutes from "./routes/investmentRoutes.js";
 import contactRoutes from "./routes/contactRoutes.js";
+import emailRoutes from "./routes/emailRoutes.js";
 
 
 // Utils
@@ -66,6 +67,7 @@ app.use("/api/package", packageRoutes);
 app.use("/api/withdrawals", withdrawalRoutes);
 app.use("/api/investments", investmentRoutes);
 app.use("/api", contactRoutes);
+app.use("/api/email", emailRoutes);
 
 // =======================
 // Test Email Route

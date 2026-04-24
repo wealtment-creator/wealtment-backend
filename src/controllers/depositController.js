@@ -61,33 +61,38 @@ message: "Deposit not found",
 });
 }
 
-console.log("Before update:", deposit);
-
 if (deposit.status !== "pending") {
 return res.status(400).json({
+success: false,
 message: "Already processed",
 });
 }
 
+// Update user balance
 await User.findByIdAndUpdate(deposit.user, {
-$inc: { balance: deposit.amount },
+$inc: { balance: Number(deposit.amount) },
 });
 
-deposit.status = "approved";
-deposit.approvedBy = req.user.id;
-deposit.approvedAt = new Date();
+// Update deposit directly in DB
+const updatedDeposit = await Deposit.findByIdAndUpdate(
+req.params.id,
+{
+status: "approved",
+approvedBy: req.user.id,
+approvedAt: new Date(),
+},
+{ new: true }
+);
 
-await deposit.save();
+console.log("Approved Deposit:", updatedDeposit);
 
-console.log("After update:", deposit);
-
-return res.json({
+return res.status(200).json({
 success: true,
 message: "Deposit approved and balance updated",
-deposit,
+deposit: updatedDeposit,
 });
 } catch (error) {
-console.log(error);
+console.log("Approve Deposit Error:", error);
 return res.status(500).json({
 success: false,
 message: error.message,
