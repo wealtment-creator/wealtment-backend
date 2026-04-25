@@ -221,11 +221,8 @@ export const resetPassword = asyncHandler(async (req, res) => {
     throw new Error("User not found");
   }
 
-  // hash new password
-  const salt = await bcrypt.genSalt(10);
-  user.password = await bcrypt.hash(password, salt);
-
-  user.resetPasswordToken = undefined;
+user.password = password;
+user.resetPasswordToken = undefined;
 
   await user.save();
   try {
