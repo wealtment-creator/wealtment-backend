@@ -122,6 +122,41 @@ export const sendDepositApprovedEmail = async (email, name, amount, coin) => {
  });
 };
 
+
+/*
+========================================
+DEPOSIT REJECTED EMAIL
+========================================
+*/
+export const sendDepositRejectedEmail = async (email, name, amount, coin) => {
+await sendEmail({
+to: email,
+subject: "Deposit Rejected - WEALTMENT",
+html: `
+<div style="background:#0b1320;padding:40px;font-family:Arial">
+<div style="max-width:600px;margin:auto;background:#111827;padding:30px;border-radius:10px">
+
+<div style="text-align:center">
+<img src="${LOGO_URL}" width="150" alt="Wealtment Logo"/>
+</div>
+
+<h2 style="color:#ef4444;text-align:center">Deposit Rejected</h2>
+
+<p style="color:white;">Hello ${name},</p>
+<p style="color:white;">Your deposit request has been rejected.</p>
+
+<div style="background:#1f2937;padding:20px;border-radius:8px">
+<p style="color:white">Amount: <b>$${amount}</b></p>
+<p style="color:white">Coin: <b>${coin}</b></p>
+<p style="color:white">Status: <b>Rejected</b></p>
+</div>
+
+</div>
+</div>
+`,
+});
+};
+
 /*
 ========================================
 WITHDRAWAL REQUEST EMAIL
@@ -345,6 +380,70 @@ A new contact message was submitted on WEALTMENT.
 <p style="color:#9ca3af; margin-top:30px; font-size:14px; text-align:center;">
 &copy; ${new Date().getFullYear()} WEALTMENT. All rights reserved.
 </p>
+
+</div>
+</div>
+`,
+});
+};
+
+/*
+========================================
+ROI CREDITED EMAIL
+========================================
+*/
+export const sendRoiCreditedEmail = async (email, name, amount) => {
+await sendEmail({
+to: email,
+subject: "ROI Credited - WEALTMENT",
+html: `
+<div style="background:#0b1320;padding:40px;font-family:Arial">
+<div style="max-width:600px;margin:auto;background:#111827;padding:30px;border-radius:10px">
+
+<div style="text-align:center">
+<img src="${LOGO_URL}" width="150" alt="Wealtment Logo"/>
+</div>
+
+<h2 style="color:#22c55e;text-align:center">ROI Credited</h2>
+
+<p style="color:white;">Hello ${name},</p>
+<p style="color:white;">Your investment profit has been credited successfully.</p>
+
+<div style="background:#1f2937;padding:20px;border-radius:8px">
+<p style="color:white">Amount Credited: <b>$${amount}</b></p>
+</div>
+
+</div>
+</div>
+`,
+});
+};
+
+/*
+========================================
+WALLET FUNDED EMAIL
+========================================
+*/
+export const sendWalletFundedEmail = async (email, name, amount) => {
+await sendEmail({
+to: email,
+subject: "Wallet Funded - WEALTMENT",
+html: `
+<div style="background:#0b1320;padding:40px;font-family:Arial">
+<div style="max-width:600px;margin:auto;background:#111827;padding:30px;border-radius:10px">
+
+<div style="text-align:center">
+<img src="${LOGO_URL}" width="150" alt="Wealtment Logo"/>
+</div>
+
+<h2 style="color:#22c55e;text-align:center">Wallet Funded</h2>
+
+<p style="color:white;">Hello ${name},</p>
+<p style="color:white;">Your wallet has been funded successfully.</p>
+
+<div style="background:#1f2937;padding:20px;border-radius:8px">
+<p style="color:white">Amount Added: <b>$${amount}</b></p>
+</div>
 
 </div>
 </div>

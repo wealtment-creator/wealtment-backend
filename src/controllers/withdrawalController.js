@@ -114,12 +114,28 @@ walletAddress,
 status: "pending",
 });
 
+// EMAIL TO USER
 try {
-await sendAdminWithdrawalRequestEmail(user.name, user.email, amount);
+await sendWithdrawalRequestEmail(
+user.email,
+user.name,
+amount,
+coinType
+);
 } catch (error) {
-console.log("Email error:", error.message);
+console.log("User email error:", error.message);
 }
 
+// EMAIL TO ADMIN
+try {
+await sendAdminWithdrawalRequestEmail(
+user.name,
+user.email,
+amount
+);
+} catch (error) {
+console.log("Admin email error:", error.message);
+}
 
 res.status(201).json(withdrawal);
 });

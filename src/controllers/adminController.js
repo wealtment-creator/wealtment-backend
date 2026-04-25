@@ -2,6 +2,7 @@ import User from "../models/userModel.js";
 import Transaction from "../models/transactionModel.js";
 import asyncHandler from "express-async-handler";
 import Investment from "../models/investmentModel.js"
+import {sendWalletFundedEmail} from "../services/emailService.js"
 
 /*
 ========================================
@@ -94,6 +95,17 @@ throw new Error("User not found");
 user.balance += Number(amount);
 await user.save();
 
+// EMAIL TO USER
+try {
+await sendWalletFundedEmail(
+user.email,
+user.name,
+amount
+);
+} catch (error) {
+console.log("User email error:", error.message);
+}
+
 let updatedWithdrawal = null;
 
 // 4. OPTIONAL: If this funding is for a withdrawal, update it
@@ -126,7 +138,6 @@ userBalance: user.balance,
 withdrawal: updatedWithdrawal,
 });
 });
-
 
 
 
@@ -196,10 +207,36 @@ deposits,
 });
 
 
+export const deductUserBalance = asyncHandler(async (req, res) => {
+const { amount } = req.body;
 
+if (!amount || isNaN(amount)) {
+res.status(400);
+throw new Error("Valid amount is required");
+}
 
+const user = await User.findById(req.params.id);
 
+if (!user) {
+res.status(404);
+throw new Error("User not found");
+}
 
+if (user.balance < amount) {
+res.status(400);
+throw new Error("Insufficient user balance");
+}
+
+user.balance -= Number(amount);
+
+await user.save();
+
+res.json({
+success: true,
+message: "Amount deducted successfully",
+userBalance: user.balance,
+});
+});
 
 
 

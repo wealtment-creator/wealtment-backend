@@ -5,6 +5,8 @@ import asyncHandler from "express-async-handler";
 import {
   sendDepositApprovedEmail,
   sendAdminDepositRequestEmail,
+  sendDepositRequestEmail,
+  sendDepositRejectedEmail,
 } from "../services/emailService.js";
 
 export const createDeposit = async (req, res) => {
@@ -24,12 +26,29 @@ coinType,
 amount,
 });
 
-const user = await User.findById(req.user.id); // ✅
+const user = await User.findById(req.user.id);
 
+// EMAIL TO USER
 try {
-await sendAdminDepositRequestEmail(user.name, user.email, amount);
+await sendDepositRequestEmail(
+user.email,
+user.name,
+amount,
+coinType
+);
 } catch (error) {
-console.log("Email error:", error.message);
+console.log("User email error:", error.message);
+}
+
+// EMAIL TO ADMIN
+try {
+await sendAdminDepositRequestEmail(
+user.name,
+user.email,
+amount
+);
+} catch (error) {
+console.log("Admin email error:", error.message);
 }
 
 res.status(201).json({
@@ -41,7 +60,6 @@ deposit,
 res.status(500).json({ message: error.message });
 }
 };
-
 
 
 
@@ -84,6 +102,20 @@ approvedAt: new Date(),
 { new: true }
 );
 
+// SEND EMAIL
+const user = await User.findById(deposit.user);
+
+try {
+await sendDepositApprovedEmail(
+user.email,
+user.name,
+deposit.amount,
+deposit.coinType
+);
+} catch (error) {
+console.log("Email error:", error.message);
+}
+
 console.log("Approved Deposit:", updatedDeposit);
 
 return res.status(200).json({
@@ -100,11 +132,7 @@ message: error.message,
 }
 };
 
-/*
-========================================
-ADMIN REJECT DEPOSIT
-========================================
-*/
+
 
 export const rejectDeposit = async (req, res) => {
 try {
@@ -123,6 +151,20 @@ deposit.approvedAt = new Date();
 
 await deposit.save();
 
+// SEND EMAIL
+const user = await User.findById(deposit.user);
+
+try {
+await sendDepositRejectedEmail(
+user.email,
+user.name,
+deposit.amount,
+deposit.coinType
+);
+} catch (error) {
+console.log("Email error:", error.message);
+}
+
 res.json({
 success: true,
 message: "Deposit rejected",
@@ -131,7 +173,6 @@ message: "Deposit rejected",
 res.status(500).json({ message: error.message });
 }
 };
-
 /*
 ========================================
 ADMIN RECENT TRANSACTIONS
