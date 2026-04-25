@@ -3,6 +3,7 @@ import User from "../models/userModel.js";
 import {
   sendWithdrawalApprovedEmail,
   sendAdminWithdrawalRequestEmail,
+  sendWithdrawalRequestEmail,
 } from "../services/emailService.js";
 import asyncHandler from "express-async-handler";
 
