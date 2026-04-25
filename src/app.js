@@ -35,6 +35,7 @@ const allowedOrigins = [
 "http://localhost:3001",
 "http://localhost:5173",
 "https://wealtment.netlify.app",
+"https://wealtment.com",
 process.env.FRONTEND_URL, // deployed frontend
 ];
 
