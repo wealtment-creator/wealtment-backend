@@ -288,7 +288,6 @@ html: `
 `,
 });
 };
-
 /*
 ========================================
 ADMIN: NEW SIGNUP
@@ -297,11 +296,30 @@ ADMIN: NEW SIGNUP
 export const sendAdminNewSignupEmail = async (name, email) => {
 await sendEmail({
 to: process.env.ADMIN_EMAIL,
-subject: "New User Signup",
+subject: "New User Signup - WEALTMENT",
 html: `
-<p>New user registered:</p>
-<p>Name: ${name}</p>
-<p>Email: ${email}</p>
+<div style="background:#0b1320;padding:40px;font-family:Arial">
+<div style="max-width:600px;margin:auto;background:#111827;padding:30px;border-radius:10px">
+
+<div style="text-align:center">
+<img src="${LOGO_URL}" width="150" alt="Wealtment Logo"/>
+</div>
+
+<h2 style="color:#22c55e;text-align:center">New User Signup</h2>
+
+<p style="color:white;">A new user has registered successfully.</p>
+
+<div style="background:#1f2937;padding:20px;border-radius:8px">
+<p style="color:white;">Name: <b>${name}</b></p>
+<p style="color:white;">Email: <b>${email}</b></p>
+</div>
+
+<p style="color:#9ca3af; margin-top:30px; font-size:14px; text-align:center;">
+&copy; ${new Date().getFullYear()} WEALTMENT. All rights reserved.
+</p>
+
+</div>
+</div>
 `,
 });
 };
@@ -314,12 +332,32 @@ ADMIN: NEW DEPOSIT REQUEST
 export const sendAdminDepositRequestEmail = async (name, email, amount) => {
 await sendEmail({
 to: process.env.ADMIN_EMAIL,
-subject: "New Deposit Request",
+subject: "New Deposit Request - WEALTMENT",
 html: `
-<p>User submitted deposit:</p>
-<p>Name: ${name}</p>
-<p>Email: ${email}</p>
-<p>Amount: $${amount}</p>
+<div style="background:#0b1320;padding:40px;font-family:Arial">
+<div style="max-width:600px;margin:auto;background:#111827;padding:30px;border-radius:10px">
+
+<div style="text-align:center">
+<img src="${LOGO_URL}" width="150" alt="Wealtment Logo"/>
+</div>
+
+<h2 style="color:#facc15;text-align:center">New Deposit Request</h2>
+
+<p style="color:white;">A user has submitted a deposit request.</p>
+
+<div style="background:#1f2937;padding:20px;border-radius:8px">
+<p style="color:white;">Name: <b>${name}</b></p>
+<p style="color:white;">Email: <b>${email}</b></p>
+<p style="color:white;">Amount: <b>$${amount}</b></p>
+<p style="color:white;">Status: <b>Pending Approval</b></p>
+</div>
+
+<p style="color:#9ca3af; margin-top:30px; font-size:14px; text-align:center;">
+&copy; ${new Date().getFullYear()} WEALTMENT. All rights reserved.
+</p>
+
+</div>
+</div>
 `,
 });
 };
@@ -332,20 +370,41 @@ ADMIN: NEW WITHDRAWAL REQUEST
 export const sendAdminWithdrawalRequestEmail = async (name, email, amount) => {
 await sendEmail({
 to: process.env.ADMIN_EMAIL,
-subject: "New Withdrawal Request",
+subject: "New Withdrawal Request - WEALTMENT",
 html: `
-<p>User requested withdrawal:</p>
-<p>Name: ${name}</p>
-<p>Email: ${email}</p>
-<p>Amount: $${amount}</p>
+<div style="background:#0b1320;padding:40px;font-family:Arial">
+<div style="max-width:600px;margin:auto;background:#111827;padding:30px;border-radius:10px">
+
+<div style="text-align:center">
+<img src="${LOGO_URL}" width="150" alt="Wealtment Logo"/>
+</div>
+
+<h2 style="color:#facc15;text-align:center">New Withdrawal Request</h2>
+
+<p style="color:white;">A user has submitted a withdrawal request.</p>
+
+<div style="background:#1f2937;padding:20px;border-radius:8px">
+<p style="color:white;">Name: <b>${name}</b></p>
+<p style="color:white;">Email: <b>${email}</b></p>
+<p style="color:white;">Amount: <b>$${amount}</b></p>
+<p style="color:white;">Status: <b>Pending Approval</b></p>
+</div>
+
+<p style="color:#9ca3af; margin-top:30px; font-size:14px; text-align:center;">
+&copy; ${new Date().getFullYear()} WEALTMENT. All rights reserved.
+</p>
+
+</div>
+</div>
 `,
 });
 };
-/*
-========================================
-ADMIN: NEW CONTACT MESSAGE
-========================================
-*/
+
+
+// // ========================================
+// ADMIN: NEW CONTACT MESSAGE
+// ========================================
+// */
 export const sendAdminContactEmail = async (email, phone, message) => {
 await sendEmail({
 to: process.env.ADMIN_EMAIL,
