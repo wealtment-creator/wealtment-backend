@@ -3,6 +3,7 @@ import User from "../models/userModel.js";
 import generateToken from "../utils/generateToken.js";
 import jwt from "jsonwebtoken";
 import { sendWelcomeEmail, sendPasswordResetEmail, sendPasswordChangedEmail } from "../services/emailService.js";
+import bcrypt from "bcryptjs";
 
 
 const generateReferralCode = () => {
