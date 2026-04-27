@@ -9,6 +9,7 @@ import {
   getAllReferrals,
   getAllDeposits,
   deductUserBalance,
+  updateUser,
 } from "../controllers/adminController.js";
 
 import { protect, adminOnly } from "../middleware/authMiddleware.js";
@@ -26,4 +27,5 @@ router.get("/investments", protect, adminOnly, getAllActiveInvestments);
 router.get("/referrals", protect, adminOnly, getAllReferrals);
 router.get("/", protect, adminOnly, getAllDeposits);
 router.put("/deduct/:id", protect, adminOnly, deductUserBalance)
+router.put("/users/:id", protect, adminOnly, updateUser);
 export default router;

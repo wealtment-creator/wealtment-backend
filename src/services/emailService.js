@@ -8,6 +8,17 @@ WEALTMENT LOGO
 const LOGO_URL =
  "https://res.cloudinary.com/dauu1z5ds/image/upload/f_auto,q_auto/502FBB5E-180D-4F1F-8E56-ADFD194F74B1_esg7bf.png";
 
+const EMAIL_FOOTER = `
+<div style="margin-top:30px;text-align:center;">
+<p style="color:#d1d5db;font-size:15px;line-height:1.6;">
+WEALTMENT is a private financial company specializing in forex, binary and cryptocurrency trading.
+</p>
+
+<p style="color:#9ca3af;font-size:14px;margin-top:15px;">
+© https://wealtment.com . All Rights Reserved.
+</p>
+</div>
+`;
 /*
 ========================================
 WELCOME EMAIL
@@ -43,9 +54,7 @@ export const sendWelcomeEmail = async (email, name) => {
  </p>
 
  <!-- Footer -->
- <p style="color:#9ca3af; margin-top:30px; font-size:14px; text-align:center;">
- &copy; ${new Date().getFullYear()} WEALTMENT. All rights reserved.
- </p>
+${EMAIL_FOOTER}
 
  </div>
  </div>
@@ -81,7 +90,8 @@ export const sendDepositRequestEmail = async (email, name, amount, coin) => {
  <p style="color:white">Coin: <b>${coin}</b></p>
  <p style="color:white">Status: <b>Pending Approval</b></p>
  </div>
-
+ <!-- Footer -->
+${EMAIL_FOOTER}
  </div>
  </div>
  `,
@@ -115,7 +125,8 @@ export const sendDepositApprovedEmail = async (email, name, amount, coin) => {
  <p style="color:white">Coin: <b>${coin}</b></p>
  <p style="color:white">Status: <b>Approved</b></p>
  </div>
-
+ <!-- Footer -->
+${EMAIL_FOOTER}
  </div>
  </div>
  `,
@@ -150,7 +161,8 @@ html: `
 <p style="color:white">Coin: <b>${coin}</b></p>
 <p style="color:white">Status: <b>Rejected</b></p>
 </div>
-
+ <!-- Footer -->
+${EMAIL_FOOTER}
 </div>
 </div>
 `,
@@ -187,6 +199,10 @@ export const sendWithdrawalRequestEmail = async (email, name, amount, coin) => {
 
  <p style="color:#9ca3af;margin-top:20px">Admin will review and approve shortly.</p>
 
+
+
+  <!-- Footer -->
+${EMAIL_FOOTER}
  </div>
  </div>
  `,
@@ -220,7 +236,8 @@ export const sendWithdrawalApprovedEmail = async (email, name, amount, coin) => 
  <p style="color:white">Coin: <b>${coin}</b></p>
  <p style="color:white">Status: <b>Approved</b></p>
  </div>
-
+ <!-- Footer -->
+${EMAIL_FOOTER}
  </div>
  </div>
  `,
@@ -255,6 +272,8 @@ style="display:inline-block;margin-top:20px;padding:12px 20px;background:#facc15
 Reset Password
 </a>
 
+ <!-- Footer -->
+${EMAIL_FOOTER}
 </div>
 </div>
 `,
@@ -283,6 +302,9 @@ html: `
 <p style="color:white;">Hello ${name},</p>
 <p style="color:white;">Your password has been changed successfully.</p>
 
+
+ <!-- Footer -->
+${EMAIL_FOOTER}
 </div>
 </div>
 `,
@@ -318,6 +340,9 @@ html: `
 &copy; ${new Date().getFullYear()} WEALTMENT. All rights reserved.
 </p>
 
+
+ <!-- Footer -->
+${EMAIL_FOOTER}
 </div>
 </div>
 `,
@@ -356,6 +381,9 @@ html: `
 &copy; ${new Date().getFullYear()} WEALTMENT. All rights reserved.
 </p>
 
+
+ <!-- Footer -->
+${EMAIL_FOOTER}
 </div>
 </div>
 `,
@@ -394,6 +422,9 @@ html: `
 &copy; ${new Date().getFullYear()} WEALTMENT. All rights reserved.
 </p>
 
+
+ <!-- Footer -->
+${EMAIL_FOOTER}
 </div>
 </div>
 `,
@@ -440,6 +471,9 @@ A new contact message was submitted on WEALTMENT.
 &copy; ${new Date().getFullYear()} WEALTMENT. All rights reserved.
 </p>
 
+
+ <!-- Footer -->
+${EMAIL_FOOTER}
 </div>
 </div>
 `,
@@ -471,7 +505,8 @@ html: `
 <div style="background:#1f2937;padding:20px;border-radius:8px">
 <p style="color:white">Amount Credited: <b>$${amount}</b></p>
 </div>
-
+ <!-- Footer -->
+${EMAIL_FOOTER}
 </div>
 </div>
 `,
@@ -503,7 +538,8 @@ html: `
 <div style="background:#1f2937;padding:20px;border-radius:8px">
 <p style="color:white">Amount Added: <b>$${amount}</b></p>
 </div>
-
+ <!-- Footer -->
+${EMAIL_FOOTER}
 </div>
 </div>
 `,

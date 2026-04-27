@@ -239,4 +239,38 @@ userBalance: user.balance,
 });
 
 
+/*
+========================================
+ADMIN UPDATE USER
+========================================
+*/
+export const updateUser = asyncHandler(async (req, res) => {
+const { name, email, bitcoinAddress, litecoinAddress } = req.body;
 
+const user = await User.findById(req.params.id);
+
+if (!user) {
+res.status(404);
+throw new Error("User not found");
+}
+
+user.name = name || user.name;
+user.email = email || user.email;
+user.bitcoinAddress = bitcoinAddress || user.bitcoinAddress;
+user.litecoinAddress = litecoinAddress || user.litecoinAddress;
+
+const updatedUser = await user.save();
+
+res.json({
+success: true,
+message: "User updated successfully",
+user: {
+_id: updatedUser._id,
+name: updatedUser.name,
+email: updatedUser.email,
+bitcoinAddress: updatedUser.bitcoinAddress,
+litecoinAddress: updatedUser.litecoinAddress,
+balance: updatedUser.balance,
+},
+});
+});
