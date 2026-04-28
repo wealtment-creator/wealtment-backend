@@ -101,14 +101,19 @@ res.status(404);
 throw new Error("User not found");
 }
 
-const availableBalance = parseFloat(user.balance);
-const withdrawalAmount = parseFloat(amount);
+const availableBalance = Number(user.balance);
+const withdrawalAmount = Number(String(amount).replace(/,/g, ""));
 
-console.log("Balance", availableBalance, typeof availableBalance);
+console.log("Balance:", availableBalance, typeof availableBalance);
 console.log("Amount:", withdrawalAmount, typeof withdrawalAmount);
 
+if (isNaN(withdrawalAmount) || withdrawalAmount <= 0) {
+res.status(400);
+throw new Error("Invalid withdrawal amount");
+}
+
 // check balance
-if (Number(user.balance) < Number(amount)) {
+if (availableBalance < withdrawalAmount) {
 res.status(400);
 throw new Error("Insufficient balance");
 }
@@ -126,7 +131,7 @@ try {
 await sendWithdrawalRequestEmail(
 user.email,
 user.name,
-amount,
+withdrawalAmount,
 coinType
 );
 } catch (error) {
@@ -138,7 +143,7 @@ try {
 await sendAdminWithdrawalRequestEmail(
 user.name,
 user.email,
-amount
+withdrawalAmount
 );
 } catch (error) {
 console.log("Admin email error:", error.message);
@@ -146,12 +151,3 @@ console.log("Admin email error:", error.message);
 
 res.status(201).json(withdrawal);
 });
-
-
-
-
-
-
-
-
-
