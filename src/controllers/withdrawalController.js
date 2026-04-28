@@ -101,6 +101,12 @@ res.status(404);
 throw new Error("User not found");
 }
 
+const availableBalance = parseFloat(user.balance);
+const withdrawalAmount = parseFloat(amount);
+
+console.log("Balance", availableBalance, typeof availableBalance);
+console.log("Amount:", withdrawalAmount, typeof withdrawalAmount);
+
 // check balance
 if (Number(user.balance) < Number(amount)) {
 res.status(400);
@@ -109,7 +115,7 @@ throw new Error("Insufficient balance");
 
 const withdrawal = await Withdrawal.create({
 user: req.user._id,
-amount: Number(amount),
+amount: withdrawalAmount,
 coinType,
 walletAddress,
 status: "pending",
