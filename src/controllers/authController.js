@@ -52,6 +52,7 @@ export const signup = asyncHandler(async (req, res) => {
  ========================================
  */
  let referrer = null;
+ let referrerName = "";
 
  if (referralCode && referralCode.trim() !== "") {
  referrer = await User.findOne({ referralCode });
@@ -60,6 +61,7 @@ export const signup = asyncHandler(async (req, res) => {
  res.status(400);
  throw new Error("Invalid referral code");
  }
+ referrerName = referrer.name;
  }
 
  /*

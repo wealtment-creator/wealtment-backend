@@ -242,9 +242,11 @@ const referrals = await User.find({ referredBy: userId })
 .sort({ createdAt: -1 });
 
 // Get current user for earnings
-const user = await User.findById(userId);
+const user = await User.findById(userId).select("referralCode name referralEarnings");
 
 res.json({
+  referralName: user.name,
+  referralCode: user.referralCode,
 totalReferrals: referrals.length,
 totalEarnings: user.referralEarnings,
 referrals,
