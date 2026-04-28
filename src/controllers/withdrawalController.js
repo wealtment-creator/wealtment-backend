@@ -11,6 +11,8 @@ import asyncHandler from "express-async-handler";
 // ADMIN APPROVE ALL WITHDRAWLS
 
 export const approveWithdrawal = asyncHandler(async (req, res) => {
+const { description } = req.body;
+
 const withdrawal = await Withdrawal.findById(req.params.id).populate("user");
 
 if (!withdrawal) {
@@ -25,41 +27,39 @@ throw new Error("Already processed");
 
 const user = withdrawal.user;
 
-// ✅ CHECK BALANCE
 if (user.balance < withdrawal.amount) {
 res.status(400);
 throw new Error("Insufficient user balance");
 }
 
-// ✅ DEDUCT BALANCE
 user.balance -= withdrawal.amount;
 await user.save();
 
-// ✅ UPDATE STATUS
 withdrawal.status = "approved";
 withdrawal.isCredited = true;
 withdrawal.approvedAt = new Date();
 withdrawal.approvedBy = req.user._id;
 
 await withdrawal.save();
+
 try {
 await sendWithdrawalApprovedEmail(
 user.email,
 user.name,
 withdrawal.amount,
-withdrawal.coinType
+withdrawal.coinType,
+withdrawal.walletAddress,
+description
 );
 } catch (error) {
 console.log("Email error:", error.message);
 }
-
 
 res.json({
 message: "Withdrawal approved & balance deducted",
 withdrawal,
 });
 });
-
 
 
 // ADMIN GET ALL WITHDRAWALS
