@@ -2,77 +2,94 @@ import Investment from "../models/investmentModel.js"
 import asyncHandler from "express-async-handler";
 import Package from "../models/packageModel.js";
 import User from "../models/userModel.js";
-
 export const createInvestment = asyncHandler(async (req, res) => {
- const { packageId, amount } = req.body;
+const { packageId, amount } = req.body;
 
- if (!packageId || !amount) {
- res.status(400);
- throw new Error("packageId and amount are required");
- }
+if (!packageId || !amount) {
+res.status(400);
+throw new Error("packageId and amount are required");
+}
 
- const pkg = await Package.findById(packageId);
+const pkg = await Package.findById(packageId);
 
- if (!pkg) {
- res.status(404);
- throw new Error("Package not found");
- }
+if (!pkg) {
+res.status(404);
+throw new Error("Package not found");
+}
 
- // VERY IMPORTANT FIX
- const durationDays = parseInt(pkg.duration);
+// find user
+const user = await User.findById(req.user._id);
 
- if (isNaN(durationDays)) {
- res.status(400);
- throw new Error("Invalid package duration. Must be a number.");
- }
+if (!user) {
+res.status(404);
+throw new Error("User not found");
+}
 
- const startDate = new Date();
+// check if balance is enough
+if (user.balance < amount) {
+res.status(400);
+throw new Error("Insufficient balance");
+}
 
- const endDate = new Date();
- endDate.setDate(startDate.getDate() + durationDays);
+// deduct investment amount
+user.balance -= Number(amount);
+await user.save();
 
- const totalProfit = (amount * pkg.profitPercentage) / 100;
+// VERY IMPORTANT FIX
+const durationHours = parseInt(pkg.duration);
 
- const investment = await Investment.create({
- user: req.user._id,
- package: pkg._id,
- amount,
- profitPercentage: pkg.profitPercentage,
- totalProfit,
- startDate,
- endDate,
- });
+if (isNaN(durationHours)) {
+res.status(400);
+throw new Error("Invalid package duration. Must be a number.");
+}
 
- /*
- ========================================
- REFERRAL BONUS LOGIC (SAFE ADDITION)
- ========================================
- */
- const user = await User.findById(req.user._id);
+const startDate = new Date();
 
- if (!user.hasInvested) {
- if (user.referredBy) {
- const referrer = await User.findById(user.referredBy);
+const endDate = new Date();
+endDate.setHours(startDate.getHours() + durationHours);
 
- if (referrer) {
- const bonus = amount * 0.1; // 10%
+const totalProfit = (amount * pkg.profitPercentage) / 100;
 
- referrer.balance += bonus;
- referrer.referralEarnings += bonus;
+const investment = await Investment.create({
+user: req.user._id,
+package: pkg._id,
+amount,
+profitPercentage: pkg.profitPercentage,
+totalProfit,
+startDate,
+endDate,
+});
 
- await referrer.save();
- }
- }
+/*
+========================================
+REFERRAL BONUS LOGIC (SAFE ADDITION)
+========================================
+*/
+if (!user.hasInvested) {
+if (user.referredBy) {
+const referrer = await User.findById(user.referredBy);
 
- // mark user as having invested
- user.hasInvested = true;
- await user.save();
- }
+if (referrer) {
+const bonus = amount * 0.1; // 10%
 
- res.status(201).json({
- success: true,
- investment,
- });
+referrer.balance += bonus;
+referrer.referralEarnings += bonus;
+
+await referrer.save();
+}
+}
+
+// mark user as having invested
+user.hasInvested = true;
+await user.save();
+}
+
+res.status(201).json({
+success: true,
+message: "Investment created successfully",
+investment,
+balance: user.balance,
+});
 });
 
 export const getMyInvestments = asyncHandler(async (req, res) => {

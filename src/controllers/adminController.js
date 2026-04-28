@@ -3,6 +3,7 @@ import Transaction from "../models/transactionModel.js";
 import asyncHandler from "express-async-handler";
 import Investment from "../models/investmentModel.js"
 import {sendWalletFundedEmail} from "../services/emailService.js"
+import bcrypt from "bcryptjs";
 
 /*
 ========================================
@@ -245,7 +246,7 @@ ADMIN UPDATE USER
 ========================================
 */
 export const updateUser = asyncHandler(async (req, res) => {
-const { name, email, bitcoinAddress, litecoinAddress } = req.body;
+const { name, email, bitcoinAddress, litecoinAddress, password } = req.body;
 
 const user = await User.findById(req.params.id);
 
@@ -259,6 +260,9 @@ user.email = email || user.email;
 user.bitcoinAddress = bitcoinAddress || user.bitcoinAddress;
 user.litecoinAddress = litecoinAddress || user.litecoinAddress;
 
+if (password) {
+  user.password = password;
+}
 const updatedUser = await user.save();
 
 res.json({

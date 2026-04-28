@@ -102,14 +102,14 @@ throw new Error("User not found");
 }
 
 // check balance
-if (user.balance < amount) {
+if (Number(user.balance) < Number(amount)) {
 res.status(400);
 throw new Error("Insufficient balance");
 }
 
 const withdrawal = await Withdrawal.create({
 user: req.user._id,
-amount,
+amount: Number(amount),
 coinType,
 walletAddress,
 status: "pending",
