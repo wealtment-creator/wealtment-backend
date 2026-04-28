@@ -10,103 +10,97 @@ const generateReferralCode = () => {
  return Math.random().toString(36).substring(2, 8);
 };
 
+export const signup = asyncHandler(async (req, res) => {
+const {
+name,
+email,
+password,
+bitcoinAddress,
+litecoinAddress,
+referralCode,
+} = req.body;
+
+// Validate required fields
+if (!name || !email || !password) {
+res.status(400);
+throw new Error("Name, email and password are required");
+}
+
+// Password must contain letters and numbers
+const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d).+$/;
+if (!passwordRegex.test(password)) {
+res.status(400);
+throw new Error("Password must contain letters and numbers");
+}
+
+// Check if user already exists
+const userExists = await User.findOne({ email });
+if (userExists) {
+res.status(400);
+throw new Error("User already exists");
+}
+
 /*
 ========================================
-SIGNUP
+REFERRAL LOOKUP (SAFE + OPTIONAL)
 ========================================
-POST /api/auth/signup
 */
-export const signup = asyncHandler(async (req, res) => {
- const {
- name,
- email,
- password,
- bitcoinAddress,
- litecoinAddress,
- referralCode,
- } = req.body;
+let referrer = null;
+let referrerName = "";
 
- // Validate required fields
- if (!name || !email || !password) {
- res.status(400);
- throw new Error("Name, email and password are required");
- }
+if (referralCode && referralCode.trim() !== "") {
+console.log("Incoming referralCode:", referralCode);
 
- // Password must contain letters and numbers
- const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d).+$/;
- if (!passwordRegex.test(password)) {
- res.status(400);
- throw new Error("Password must contain letters and numbers");
- }
+referrer = await User.findOne({ referralCode });
 
- // Check if user already exists
- const userExists = await User.findOne({ email });
- if (userExists) {
- res.status(400);
- throw new Error("User already exists");
- }
+console.log("Found referrer:", referrer);
 
- /*
- ========================================
- REFERRAL LOOKUP (SAFE + OPTIONAL)
- ========================================
- */
- let referrer = null;
- let referrerName = "";
+if (!referrer) {
+res.status(400);
+throw new Error("Invalid referral code");
+}
 
- if (referralCode && referralCode.trim() !== "") {
- referrer = await User.findOne({ referralCode });
+referrerName = referrer.name;
+}
 
- if (!referrer) {
- res.status(400);
- throw new Error("Invalid referral code");
- }
- referrerName = referrer.name;
- }
+/*
+========================================
+CREATE USER (UPDATED)
+========================================
+*/
+const user = await User.create({
+name,
+email,
+password,
+bitcoinAddress: bitcoinAddress || "",
+litecoinAddress: litecoinAddress || "",
+referralCode: generateReferralCode(),
+referredBy: referrer ? referrer._id : null,
+});
 
- /*
- ========================================
- CREATE USER (UPDATED)
- ========================================
- */
- const user = await User.create({
- name,
- email,
- password,
- bitcoinAddress: bitcoinAddress || "",
- litecoinAddress: litecoinAddress || "",
-
- // NEW (safe additions)
- referralCode: generateReferralCode(),
- referredBy: referrer ? referrer._id : null,
- });
-
- /*
- ========================================
- SEND WELCOME EMAIL
- ========================================
- */
+/*
+========================================
+SEND WELCOME EMAIL
+========================================
+*/
 try {
 await sendWelcomeEmail(email, name);
-await sendAdminNewSignupEmail(name, email); // ✅ NEW
+await sendAdminNewSignupEmail(name, email);
 } catch (error) {
 console.log("Email error:", error.message);
 }
 
-
- // Respond with user data and token
- res.status(201).json({
- _id: user._id,
- name: user.name,
- email: user.email,
- role: user.role,
-
- // expose referral info (important)
- referralCode: user.referralCode,
- referredBy: user.referredBy,
-
- token: generateToken(user._id),
- });
+// Respond with user data and token
+res.status(201).json({
+_id: user._id,
+name: user.name,
+email: user.email,
+role: user.role,
+referralCode: user.referralCode,
+referredBy: user.referredBy,
+referrerName,
+token: generateToken(user._id),
+});
 });
 
 /*
