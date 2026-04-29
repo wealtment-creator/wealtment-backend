@@ -11,7 +11,7 @@ import asyncHandler from "express-async-handler";
 // ADMIN APPROVE ALL WITHDRAWLS
 
 export const approveWithdrawal = asyncHandler(async (req, res) => {
-const { description } = req.body;
+const { description } = req.body || {};
 
 const withdrawal = await Withdrawal.findById(req.params.id).populate("user");
 
