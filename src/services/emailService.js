@@ -214,7 +214,7 @@ ${EMAIL_FOOTER}
 WITHDRAWAL APPROVED EMAIL
 ========================================
 */
-export const sendWithdrawalApprovedEmail = async (email, name, amount, coinType, walletAddress, description) => {
+export const sendWithdrawalApprovedEmail = async (email, name, amount, coin, walletAddress, description) => {
  await sendEmail({
  to: email,
  subject: "Withdrawal Approved - WEALTMENT",
