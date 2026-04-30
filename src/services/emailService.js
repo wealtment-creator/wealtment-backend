@@ -234,7 +234,16 @@ export const sendWithdrawalApprovedEmail = async (email, name, amount, coin, wal
  <div style="background:#1f2937;padding:20px;border-radius:8px">
  <p style="color:white">Amount: <b>$${amount}</b></p>
  <p style="color:white">Coin: <b>${coin}</b></p>
- <p style="color:white">Status: <b>Approved</b></p>
+<p style="color:white">Wallet: <b>${walletAddress}</b></p>
+<p style="color:white">Status: <b>Approved</b></p>
+
+${
+description
+? `<p style="color:white; margin-top:15px;">
+<strong>Note:</strong> ${description}
+</p>`
+: ""
+}
  </div>
  <!-- Footer -->
 ${EMAIL_FOOTER}
