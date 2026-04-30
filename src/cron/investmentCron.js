@@ -16,8 +16,20 @@ for (const inv of expiredInvestments) {
 const user = await User.findById(inv.user);
 
 if (user) {
-// credit user wallet
-user.balance += inv.amount + inv.totalProfit;
+const totalReturn = inv.amount + inv.totalProfit;
+
+// ✅ credit correct wallet
+if (inv.coinType === "bitcoin") {
+user.btcBalance += totalReturn;
+}
+
+if (inv.coinType === "litecoin") {
+user.ltcBalance += totalReturn;
+}
+
+// keep total balance
+user.balance += totalReturn;
+
 await user.save();
 
 // update investment

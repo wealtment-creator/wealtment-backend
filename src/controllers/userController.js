@@ -14,7 +14,7 @@ FETCH USER BALANCE
 
 export const getBalance = async (req, res) => {
 try {
-const user = await User.findById(req.user.id).select("balance");
+const user = await User.findById(req.user.id).select("balance btcBalance ltcBalance");
 
 if (!user) {
 return res.status(404).json({
@@ -26,6 +26,8 @@ message: "User not found",
 return res.json({
 success: true,
 balance: user.balance,
+btcBalance: user.btcBalance,
+ltcBalance: user.ltcBalance,
 });
 
 } catch (error) {

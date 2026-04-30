@@ -40,6 +40,15 @@ const userSchema = new mongoose.Schema(
  default: 0,
  },
 
+ btcBalance: {
+ type: Number,
+ default: 0,
+ },
+ ltcBalance: {
+ type: Number,
+ default: 0,
+ },
+
  // =========================
  // REFERRAL SYSTEM (ADDED)
  // =========================

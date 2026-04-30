@@ -62,12 +62,6 @@ res.status(500).json({ message: error.message });
 };
 
 
-
-/*
-========================================
-ADMIN APPROVE DEPOSIT
-========================================
-*/
 export const approveDeposit = async (req, res) => {
 try {
 const deposit = await Deposit.findById(req.params.id);
@@ -86,12 +80,24 @@ message: "Already processed",
 });
 }
 
-// Update user balance
-await User.findByIdAndUpdate(deposit.user, {
-$inc: { balance: Number(deposit.amount) },
-});
+// ✅ UPDATED BALANCE LOGIC
+const updateFields = {
+$inc: {
+balance: Number(deposit.amount),
+},
+};
 
-// Update deposit directly in DB
+if (deposit.coinType === "bitcoin") {
+updateFields.$inc.btcBalance = Number(deposit.amount);
+}
+
+if (deposit.coinType === "litecoin") {
+updateFields.$inc.ltcBalance = Number(deposit.amount);
+}
+
+await User.findByIdAndUpdate(deposit.user, updateFields);
+
+// Update deposit
 const updatedDeposit = await Deposit.findByIdAndUpdate(
 req.params.id,
 {
@@ -131,8 +137,6 @@ message: error.message,
 });
 }
 };
-
-
 
 export const rejectDeposit = async (req, res) => {
 try {

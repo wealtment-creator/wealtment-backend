@@ -18,6 +18,11 @@ amount: {
 type: Number,
 required: true,
 },
+coinType:{
+    type: String,
+    enum: ["bitcoin", "litecoin"],
+    required: true,
+},
 
 profitPercentage: {
 type: Number,

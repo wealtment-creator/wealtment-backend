@@ -2,12 +2,16 @@ import Investment from "../models/investmentModel.js"
 import asyncHandler from "express-async-handler";
 import Package from "../models/packageModel.js";
 import User from "../models/userModel.js";
-export const createInvestment = asyncHandler(async (req, res) => {
-const { packageId, amount } = req.body;
 
-if (!packageId || !amount) {
+
+
+
+export const createInvestment = asyncHandler(async (req, res) => {
+const { packageId, amount, coinType } = req.body;
+
+if (!packageId || !amount || !coinType) {
 res.status(400);
-throw new Error("packageId and amount are required");
+throw new Error("packageId, amount and coinType are required");
 }
 
 const pkg = await Package.findById(packageId);
@@ -25,17 +29,37 @@ res.status(404);
 throw new Error("User not found");
 }
 
-// check if balance is enough
-if (user.balance < amount) {
+// ✅ check correct wallet balance
+let availableBalance = 0;
+
+if (coinType === "bitcoin") {
+availableBalance = user.btcBalance;
+} else if (coinType === "litecoin") {
+availableBalance = user.ltcBalance;
+} else {
+res.status(400);
+throw new Error("Invalid coin type");
+}
+
+if (availableBalance < amount) {
 res.status(400);
 throw new Error("Insufficient balance");
 }
 
-// deduct investment amount
+// ✅ deduct from correct wallet
+if (coinType === "bitcoin") {
+user.btcBalance -= Number(amount);
+}
+
+if (coinType === "litecoin") {
+user.ltcBalance -= Number(amount);
+}
+
+// keep total balance consistent
 user.balance -= Number(amount);
 await user.save();
 
-// VERY IMPORTANT FIX
+// duration
 const durationHours = parseInt(pkg.duration);
 
 if (isNaN(durationHours)) {
@@ -44,7 +68,6 @@ throw new Error("Invalid package duration. Must be a number.");
 }
 
 const startDate = new Date();
-
 const endDate = new Date();
 endDate.setHours(startDate.getHours() + durationHours);
 
@@ -54,6 +77,7 @@ const investment = await Investment.create({
 user: req.user._id,
 package: pkg._id,
 amount,
+coinType, // ✅ NEW
 profitPercentage: pkg.profitPercentage,
 totalProfit,
 startDate,
@@ -70,7 +94,7 @@ if (user.referredBy) {
 const referrer = await User.findById(user.referredBy);
 
 if (referrer) {
-const bonus = amount * 0.1; // 10%
+const bonus = amount * 0.1;
 
 referrer.balance += bonus;
 referrer.referralEarnings += bonus;
@@ -79,7 +103,6 @@ await referrer.save();
 }
 }
 
-// mark user as having invested
 user.hasInvested = true;
 await user.save();
 }

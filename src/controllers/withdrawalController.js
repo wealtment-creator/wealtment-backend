@@ -27,12 +27,35 @@ throw new Error("Already processed");
 
 const user = withdrawal.user;
 
-if (user.balance < withdrawal.amount) {
+// ✅ CHECK BASED ON COIN
+if (
+withdrawal.coinType === "bitcoin" &&
+user.btcBalance < withdrawal.amount
+) {
 res.status(400);
-throw new Error("Insufficient user balance");
+throw new Error("Insufficient BTC balance");
 }
 
+if (
+withdrawal.coinType === "litecoin" &&
+user.ltcBalance < withdrawal.amount
+) {
+res.status(400);
+throw new Error("Insufficient LTC balance");
+}
+
+// ✅ DEDUCT FROM CORRECT WALLET
+if (withdrawal.coinType === "bitcoin") {
+user.btcBalance -= withdrawal.amount;
+}
+
+if (withdrawal.coinType === "litecoin") {
+user.ltcBalance -= withdrawal.amount;
+}
+
+// keep total balance consistent
 user.balance -= withdrawal.amount;
+
 await user.save();
 
 withdrawal.status = "approved";
@@ -101,18 +124,29 @@ res.status(404);
 throw new Error("User not found");
 }
 
-const availableBalance = Number(user.balance);
 const withdrawalAmount = Number(String(amount).replace(/,/g, ""));
-
-console.log("Balance:", availableBalance, typeof availableBalance);
-console.log("Amount:", withdrawalAmount, typeof withdrawalAmount);
 
 if (isNaN(withdrawalAmount) || withdrawalAmount <= 0) {
 res.status(400);
 throw new Error("Invalid withdrawal amount");
 }
 
-// check balance
+// ✅ GET CORRECT BALANCE BASED ON COIN
+let availableBalance = 0;
+
+if (coinType === "bitcoin") {
+availableBalance = user.btcBalance;
+} else if (coinType === "litecoin") {
+availableBalance = user.ltcBalance;
+} else {
+res.status(400);
+throw new Error("Invalid coin type");
+}
+
+console.log("Available:", availableBalance);
+console.log("Requested:", withdrawalAmount);
+
+// ✅ CHECK BALANCE
 if (availableBalance < withdrawalAmount) {
 res.status(400);
 throw new Error("Insufficient balance");
