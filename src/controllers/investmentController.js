@@ -5,7 +5,6 @@ import User from "../models/userModel.js";
 
 
 
-
 export const createInvestment = asyncHandler(async (req, res) => {
 const { packageId, amount, coinType } = req.body;
 
