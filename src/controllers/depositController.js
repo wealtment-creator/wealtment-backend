@@ -61,7 +61,6 @@ res.status(500).json({ message: error.message });
 }
 };
 
-
 export const approveDeposit = async (req, res) => {
 try {
 const deposit = await Deposit.findById(req.params.id);
@@ -77,6 +76,16 @@ if (deposit.status !== "pending") {
 return res.status(400).json({
 success: false,
 message: "Already processed",
+});
+}
+
+// ✅ GET USER FIRST (needed for referral)
+const user = await User.findById(deposit.user);
+
+if (!user) {
+return res.status(404).json({
+success: false,
+message: "User not found",
 });
 }
 
@@ -97,7 +106,35 @@ updateFields.$inc.ltcBalance = Number(deposit.amount);
 
 await User.findByIdAndUpdate(deposit.user, updateFields);
 
-// Update deposit
+/*
+========================================
+REFERRAL BONUS (NEW - SAFE)
+========================================
+*/
+if (user.referredBy) {
+const referrer = await User.findById(user.referredBy);
+
+if (referrer) {
+const bonus = Number(deposit.amount) * 0.1; // 10%
+
+// ✅ credit correct wallet
+if (deposit.coinType === "bitcoin") {
+referrer.btcBalance += bonus;
+}
+
+if (deposit.coinType === "litecoin") {
+referrer.ltcBalance += bonus;
+}
+
+// keep total balance
+referrer.balance += bonus;
+referrer.referralEarnings += bonus;
+
+await referrer.save();
+}
+}
+
+// ✅ Update deposit
 const updatedDeposit = await Deposit.findByIdAndUpdate(
 req.params.id,
 {
@@ -109,8 +146,6 @@ approvedAt: new Date(),
 );
 
 // SEND EMAIL
-const user = await User.findById(deposit.user);
-
 try {
 await sendDepositApprovedEmail(
 user.email,
@@ -137,6 +172,9 @@ message: error.message,
 });
 }
 };
+
+
+
 
 export const rejectDeposit = async (req, res) => {
 try {

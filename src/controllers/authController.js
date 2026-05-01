@@ -51,7 +51,7 @@ let referrerName = "";
 if (referralCode && referralCode.trim() !== "") {
 console.log("Incoming referralCode:", referralCode);
 
-referrer = await User.findOne({ referralCode });
+referrer = await User.findOne({ referralCode: referralCode.trim() });
 
 console.log("Found referrer:", referrer);
 
