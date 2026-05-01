@@ -209,11 +209,11 @@ deposits,
 
 
 export const deductUserBalance = asyncHandler(async (req, res) => {
-const { amount } = req.body;
+const { amount, coinType } = req.body;
 
-if (!amount || isNaN(amount)) {
+if (!amount || isNaN(amount) || !coinType) {
 res.status(400);
-throw new Error("Valid amount is required");
+throw new Error("Valid amount and coinType are required");
 }
 
 const user = await User.findById(req.params.id);
@@ -223,9 +223,27 @@ res.status(404);
 throw new Error("User not found");
 }
 
+// ✅ check correct wallet
+if (coinType === "bitcoin") {
+if (user.btcBalance < amount) {
+res.status(400);
+throw new Error("Insufficient BTC balance");
+}
+user.btcBalance -= Number(amount);
+}
+
+if (coinType === "litecoin") {
+if (user.ltcBalance < amount) {
+res.status(400);
+throw new Error("Insufficient LTC balance");
+}
+user.ltcBalance -= Number(amount);
+}
+
+// keep total balance consistent
 if (user.balance < amount) {
 res.status(400);
-throw new Error("Insufficient user balance");
+throw new Error("Insufficient total balance");
 }
 
 user.balance -= Number(amount);
@@ -235,10 +253,11 @@ await user.save();
 res.json({
 success: true,
 message: "Amount deducted successfully",
-userBalance: user.balance,
+balance: user.balance,
+btcBalance: user.btcBalance,
+ltcBalance: user.ltcBalance,
 });
 });
-
 
 /*
 ========================================

@@ -88,13 +88,28 @@ endDate,
 REFERRAL BONUS LOGIC (SAFE ADDITION)
 ========================================
 */
-if (!user.hasInvested) {
+/*
+========================================
+REFERRAL BONUS LOGIC (FIXED)
+========================================
+*/
+if (user.hasInvested === false) {
 if (user.referredBy) {
 const referrer = await User.findById(user.referredBy);
 
 if (referrer) {
-const bonus = amount * 0.1;
+const bonus = Number(amount) * 0.1;
 
+// ✅ credit correct wallet
+if (coinType === "bitcoin") {
+referrer.btcBalance += bonus;
+}
+
+if (coinType === "litecoin") {
+referrer.ltcBalance += bonus;
+}
+
+// keep total balance
 referrer.balance += bonus;
 referrer.referralEarnings += bonus;
 

@@ -222,6 +222,8 @@ export const getUserProfile = asyncHandler(async (req, res) => {
  email: user.email,
  role: user.role,
  balance: user.balance || 0,
+ btcBalance: user.btcBalance || 0,
+ ltcBalance: user.ltcBalance || 0,
  referralBalance: user.referralEarnings,
  totalBalance: user.balance + user.referralEarnings,
  bitcoinAddress: user.bitcoinAddress || "",
@@ -261,11 +263,13 @@ TRANSFER REFERRAL EARNINGS TO WALLET
 ========================================
 */
 export const transferReferralToWallet = asyncHandler(async (req, res) => {
-const amountNumber = Number(req.body.amount);
+const { amount, coinType } = req.body;
 
-if (!amountNumber || amountNumber <= 0) {
+const amountNumber = Number(amount);
+
+if (!amountNumber || amountNumber <= 0 || !coinType) {
 res.status(400);
-throw new Error("Valid amount is required");
+throw new Error("Valid amount and coinType are required");
 }
 
 const user = await User.findById(req.user._id);
@@ -280,20 +284,27 @@ res.status(400);
 throw new Error("Insufficient referral balance");
 }
 
-await User.findByIdAndUpdate(req.user._id, {
-$inc: {
-balance: amountNumber,
-referralEarnings: -amountNumber,
-},
-});
+// ✅ move to correct wallet
+if (coinType === "bitcoin") {
+user.btcBalance += amountNumber;
+}
 
-const updatedUser = await User.findById(req.user._id);
+if (coinType === "litecoin") {
+user.ltcBalance += amountNumber;
+}
+
+// keep total balance
+user.balance += amountNumber;
+
+user.referralEarnings -= amountNumber;
+
+await user.save();
 
 res.json({
 message: "Transfer successful",
-balance: updatedUser.balance,
-referralBalance: updatedUser.referralEarnings,
+balance: user.balance,
+btcBalance: user.btcBalance,
+ltcBalance: user.ltcBalance,
+referralBalance: user.referralEarnings,
 });
 });
-
-
