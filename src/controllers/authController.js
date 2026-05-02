@@ -42,25 +42,29 @@ throw new Error("User already exists");
 
 /*
 ========================================
-REFERRAL LOOKUP (SAFE + OPTIONAL)
+REFERRAL LOOKUP (FIXED)
 ========================================
 */
 let referrer = null;
 let referrerName = "";
 
 if (referralCode && referralCode.trim() !== "") {
-console.log("Incoming referralCode:", referralCode);
+  const cleanCode = referralCode.trim().toLowerCase();
 
-referrer = await User.findOne({ referralCode: referralCode.trim() });
+  console.log("Incoming referralCode:", cleanCode);
 
-console.log("Found referrer:", referrer);
+  referrer = await User.findOne({
+    referralCode: cleanCode,
+  });
 
-if (!referrer) {
-res.status(400);
-throw new Error("Invalid referral code");
-}
+  console.log("Found referrer:", referrer);
 
-referrerName = referrer.name;
+  if (!referrer) {
+    res.status(400);
+    throw new Error("Invalid referral code");
+  }
+
+  referrerName = referrer.name;
 }
 
 /*
@@ -74,7 +78,7 @@ email,
 password,
 bitcoinAddress: bitcoinAddress || "",
 litecoinAddress: litecoinAddress || "",
-referralCode: generateReferralCode(),
+referralCode: generateReferralCode().toLowerCase(),
 referredBy: referrer ? referrer._id : null,
 });
 

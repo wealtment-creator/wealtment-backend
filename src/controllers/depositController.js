@@ -60,7 +60,6 @@ deposit,
 res.status(500).json({ message: error.message });
 }
 };
-
 export const approveDeposit = async (req, res) => {
 try {
 const deposit = await Deposit.findById(req.params.id);
@@ -79,17 +78,7 @@ message: "Already processed",
 });
 }
 
-// ✅ GET USER FIRST (needed for referral)
-const user = await User.findById(deposit.user);
-
-if (!user) {
-return res.status(404).json({
-success: false,
-message: "User not found",
-});
-}
-
-// ✅ UPDATED BALANCE LOGIC
+// ✅ update balance FIRST
 const updateFields = {
 $inc: {
 balance: Number(deposit.amount),
@@ -106,18 +95,28 @@ updateFields.$inc.ltcBalance = Number(deposit.amount);
 
 await User.findByIdAndUpdate(deposit.user, updateFields);
 
+// ✅ fetch fresh user AFTER update
+const user = await User.findById(deposit.user);
+
+if (!user) {
+return res.status(404).json({
+success: false,
+message: "User not found",
+});
+}
+
 /*
 ========================================
-REFERRAL BONUS (NEW - SAFE)
+REFERRAL BONUS (FIXED)
 ========================================
 */
 if (user.referredBy) {
 const referrer = await User.findById(user.referredBy);
 
 if (referrer) {
-const bonus = Number(deposit.amount) * 0.1; // 10%
+const bonus = Number(deposit.amount) * 0.1;
 
-// ✅ credit correct wallet
+// credit correct wallet
 if (deposit.coinType === "bitcoin") {
 referrer.btcBalance += bonus;
 }
@@ -126,7 +125,6 @@ if (deposit.coinType === "litecoin") {
 referrer.ltcBalance += bonus;
 }
 
-// keep total balance
 referrer.balance += bonus;
 referrer.referralEarnings += bonus;
 
@@ -134,7 +132,7 @@ await referrer.save();
 }
 }
 
-// ✅ Update deposit
+// ✅ update deposit
 const updatedDeposit = await Deposit.findByIdAndUpdate(
 req.params.id,
 {
@@ -157,13 +155,12 @@ deposit.coinType
 console.log("Email error:", error.message);
 }
 
-console.log("Approved Deposit:", updatedDeposit);
-
 return res.status(200).json({
 success: true,
 message: "Deposit approved and balance updated",
 deposit: updatedDeposit,
 });
+
 } catch (error) {
 console.log("Approve Deposit Error:", error);
 return res.status(500).json({
@@ -172,7 +169,6 @@ message: error.message,
 });
 }
 };
-
 
 
 
