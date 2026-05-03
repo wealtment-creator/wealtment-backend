@@ -101,7 +101,8 @@ TOTAL DEPOSIT
 export const getTotalDeposit = async (req, res) => {
   try {
     const deposits = await Deposit.find({
-      user: req.user.id,
+      user: req.user.id, 
+      isDeleted: false,
       status: "approved",
     });
 
@@ -225,7 +226,9 @@ export const getUserProfile = asyncHandler(async (req, res) => {
  btcBalance: user.btcBalance || 0,
  ltcBalance: user.ltcBalance || 0,
  referralBalance: user.referralEarnings,
- totalBalance: user.balance + user.referralEarnings,
+ totalBalance: user.balance, 
+ 
+//  + user.referralEarnings,
  bitcoinAddress: user.bitcoinAddress || "",
  litecoinAddress: user.litecoinAddress || "",
  });

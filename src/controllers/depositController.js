@@ -60,6 +60,14 @@ deposit,
 res.status(500).json({ message: error.message });
 }
 };
+
+
+
+
+// APPROVE DEPOSIT
+
+
+
 export const approveDeposit = async (req, res) => {
 try {
 const deposit = await Deposit.findById(req.params.id);
@@ -105,32 +113,32 @@ message: "User not found",
 });
 }
 
-/*
-========================================
-REFERRAL BONUS (FIXED)
-========================================
-*/
-if (user.referredBy) {
-const referrer = await User.findById(user.referredBy);
+// /*
+// ========================================
+// REFERRAL BONUS (FIXED)
+// ========================================
+// */
+// if (user.referredBy) {
+// const referrer = await User.findById(user.referredBy);
 
-if (referrer) {
-const bonus = Number(deposit.amount) * 0.1;
+// if (referrer) {
+// const bonus = Number(deposit.amount) * 0.1;
 
-// credit correct wallet
-if (deposit.coinType === "bitcoin") {
-referrer.btcBalance += bonus;
-}
+// // credit correct wallet
+// if (deposit.coinType === "bitcoin") {
+// referrer.btcBalance += bonus;
+// }
 
-if (deposit.coinType === "litecoin") {
-referrer.ltcBalance += bonus;
-}
+// if (deposit.coinType === "litecoin") {
+// referrer.ltcBalance += bonus;
+// }
 
-referrer.balance += bonus;
-referrer.referralEarnings += bonus;
+// referrer.balance += bonus;
+// referrer.referralEarnings += bonus;
 
-await referrer.save();
-}
-}
+// await referrer.save();
+// }
+// }
 
 // ✅ update deposit
 const updatedDeposit = await Deposit.findByIdAndUpdate(
@@ -172,45 +180,45 @@ message: error.message,
 
 
 
-export const rejectDeposit = async (req, res) => {
-try {
-const deposit = await Deposit.findById(req.params.id);
+// export const rejectDeposit = async (req, res) => {
+// try {
+// const deposit = await Deposit.findById(req.params.id);
 
-if (!deposit) {
-return res.status(404).json({
-success: false,
-message: "Deposit not found",
-});
-}
+// if (!deposit) {
+// return res.status(404).json({
+// success: false,
+// message: "Deposit not found",
+// });
+// }
 
-deposit.status = "rejected";
-deposit.approvedBy = req.user.id;
-deposit.approvedAt = new Date();
+// deposit.status = "rejected";
+// deposit.approvedBy = req.user.id;
+// deposit.approvedAt = new Date();
 
-await deposit.save();
+// await deposit.save();
 
-// SEND EMAIL
-const user = await User.findById(deposit.user);
+// // SEND EMAIL
+// const user = await User.findById(deposit.user);
 
-try {
-await sendDepositRejectedEmail(
-user.email,
-user.name,
-deposit.amount,
-deposit.coinType
-);
-} catch (error) {
-console.log("Email error:", error.message);
-}
+// try {
+// await sendDepositRejectedEmail(
+// user.email,
+// user.name,
+// deposit.amount,
+// deposit.coinType
+// );
+// } catch (error) {
+// console.log("Email error:", error.message);
+// }
 
-res.json({
-success: true,
-message: "Deposit rejected",
-});
-} catch (error) {
-res.status(500).json({ message: error.message });
-}
-};
+// res.json({
+// success: true,
+// message: "Deposit rejected",
+// });
+// } catch (error) {
+// res.status(500).json({ message: error.message });
+// }
+// };
 /*
 ========================================
 ADMIN RECENT TRANSACTIONS
@@ -251,7 +259,7 @@ res.json(deposits);
 
 
 export const getAllDeposits = asyncHandler(async (req, res) => {
-const deposits = await Deposit.find()
+const deposits = await Deposit.find({isDeleted: false})
 .populate("user", "name email")
 .sort({ createdAt: -1 });
 

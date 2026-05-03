@@ -3,7 +3,7 @@ import express from "express";
 import {
   createDeposit,
   approveDeposit,
-  rejectDeposit,
+  // rejectDeposit,
   getRecentTransactions,
   getMyDeposits,
   getAllDeposits,
@@ -24,7 +24,7 @@ ADMIN
 */
 
 router.put("/approve/:id", protect, adminOnly, approveDeposit);
-router.put("/reject/:id", protect, adminOnly, rejectDeposit);
+// router.put("/reject/:id", protect, adminOnly, rejectDeposit);
 
 router.get("/recent-transactions", protect, adminOnly, getRecentTransactions);
 

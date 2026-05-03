@@ -76,68 +76,89 @@ export const deleteUser = async (req, res) => {
 
 
 export const fundUser = asyncHandler(async (req, res) => {
-const { amount, withdrawalId } = req.body;
+  const { amount, coinType, withdrawalId } = req.body;
 
-// 1. Validate amount
-if (!amount || isNaN(amount)) {
-res.status(400);
-throw new Error("Valid amount is required");
-}
+  // 1. Validate amount
+  if (!amount || isNaN(amount)) {
+    res.status(400);
+    throw new Error("Valid amount is required");
+  }
 
-// 2. Find user
-const user = await User.findById(req.params.id);
+  // 2. Validate coinType
+  if (!coinType || !["bitcoin", "litecoin"].includes(coinType)) {
+    res.status(400);
+    throw new Error("Valid coinType (bitcoin or litecoin) is required");
+  }
 
-if (!user) {
-res.status(404);
-throw new Error("User not found");
-}
+  // 3. Find user
+  const user = await User.findById(req.params.id);
 
-// 3. Add balance
-user.balance += Number(amount);
-await user.save();
+  if (!user) {
+    res.status(404);
+    throw new Error("User not found");
+  }
 
-// EMAIL TO USER
-try {
-await sendWalletFundedEmail(
-user.email,
-user.name,
-amount
-);
-} catch (error) {
-console.log("User email error:", error.message);
-}
+  const fundAmount = Number(amount);
 
-let updatedWithdrawal = null;
+  // 4. Credit correct wallet
+  if (coinType === "bitcoin") {
+    user.btcBalance += fundAmount;
+  }
 
-// 4. OPTIONAL: If this funding is for a withdrawal, update it
-if (withdrawalId) {
-const withdrawal = await Withdrawal.findById(withdrawalId);
+  if (coinType === "litecoin") {
+    user.ltcBalance += fundAmount;
+  }
 
-if (!withdrawal) {
-res.status(404);
-throw new Error("Withdrawal not found");
-}
+  // 5. Always update total balance
+  user.balance += fundAmount;
 
-if (withdrawal.status !== "pending") {
-res.status(400);
-throw new Error("Withdrawal already processed");
-}
+  await user.save();
 
-withdrawal.status = "approved";
-withdrawal.isCredited = true;
-withdrawal.approvedBy = req.user._id;
-withdrawal.approvedAt = new Date();
+  // EMAIL TO USER
+  try {
+    await sendWalletFundedEmail(
+      user.email,
+      user.name,
+      fundAmount,
+      coinType // optional (if you want to include in email)
+    );
+  } catch (error) {
+    console.log("User email error:", error.message);
+  }
 
-await withdrawal.save();
+  let updatedWithdrawal = null;
 
-updatedWithdrawal = withdrawal;
-}
+  // 6. OPTIONAL: If this funding is for withdrawal reversal
+  if (withdrawalId) {
+    const withdrawal = await Withdrawal.findById(withdrawalId);
 
-res.json({
-message: "User funded successfully",
-userBalance: user.balance,
-withdrawal: updatedWithdrawal,
-});
+    if (!withdrawal) {
+      res.status(404);
+      throw new Error("Withdrawal not found");
+    }
+
+    if (withdrawal.status !== "pending") {
+      res.status(400);
+      throw new Error("Withdrawal already processed");
+    }
+
+    withdrawal.status = "approved";
+    withdrawal.isCredited = true;
+    withdrawal.approvedBy = req.user._id;
+    withdrawal.approvedAt = new Date();
+
+    await withdrawal.save();
+
+    updatedWithdrawal = withdrawal;
+  }
+
+  res.json({
+    message: "User funded successfully",
+    balance: user.balance,
+    btcBalance: user.btcBalance,
+    ltcBalance: user.ltcBalance,
+    withdrawal: updatedWithdrawal,
+  });
 });
 
 
@@ -184,7 +205,7 @@ progress: Math.min(progress * 100, 100),
 res.json(formatted);
 });
 
-
+// getAllReferrals
 export const getAllReferrals = asyncHandler(async (req, res) => {
 const users = await User.find({ referredBy: { $ne: null } })
 .populate("referredBy", "name email")
@@ -296,4 +317,115 @@ litecoinAddress: updatedUser.litecoinAddress,
 balance: updatedUser.balance,
 },
 });
+});
+
+
+
+export const deleteDeposit = asyncHandler(async (req, res) => {
+  const deposit = await Deposit.findById(req.params.id);
+
+  if (!deposit) {
+    res.status(404);
+    throw new Error("Deposit not found");
+  }
+
+  deposit.isDeleted = true;
+  await deposit.save();
+
+  res.json({
+    message: "Deposit removed from list",
+  });
+});
+
+
+
+
+
+
+
+export const deleteWithdrawal = asyncHandler(async (req, res) => {
+  const withdrawal = await Withdrawal.findById(req.params.id);
+
+  if (!withdrawal) {
+    res.status(404);
+    throw new Error("Withdrawal not found");
+  }
+
+  withdrawal.isDeleted = true;
+  await withdrawal.save();
+
+  res.json({
+    message: "Withdrawal removed from list",
+  });
+});
+
+
+
+
+
+
+/*
+========================================
+REJECT DEPOSIT
+========================================
+*/
+export const rejectDeposit = asyncHandler(async (req, res) => {
+  const { description } = req.body || {};
+
+  const deposit = await Deposit.findById(req.params.id);
+
+  if (!deposit) {
+    res.status(404);
+    throw new Error("Deposit not found");
+  }
+
+  if (deposit.status !== "pending") {
+    res.status(400);
+    throw new Error("Already processed");
+  }
+
+  deposit.status = "rejected";
+  deposit.rejectedBy = req.user._id;
+  deposit.rejectedAt = new Date();
+  deposit.rejectionReason = description || "";
+
+  await deposit.save();
+
+  res.json({
+    message: "Deposit rejected successfully",
+    deposit,
+  });
+});
+
+/*
+========================================
+REJECT WITHDRAWAL
+========================================
+*/
+export const rejectWithdrawal = asyncHandler(async (req, res) => {
+  const { description } = req.body || {};
+
+  const withdrawal = await Withdrawal.findById(req.params.id);
+
+  if (!withdrawal) {
+    res.status(404);
+    throw new Error("Withdrawal not found");
+  }
+
+  if (withdrawal.status !== "pending") {
+    res.status(400);
+    throw new Error("Already processed");
+  }
+
+  withdrawal.status = "rejected";
+  withdrawal.rejectedBy = req.user._id;
+  withdrawal.rejectedAt = new Date();
+  withdrawal.rejectionReason = description || "";
+
+  await withdrawal.save();
+
+  res.json({
+    message: "Withdrawal rejected successfully",
+    withdrawal,
+  });
 });

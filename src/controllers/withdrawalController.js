@@ -87,7 +87,7 @@ withdrawal,
 
 // ADMIN GET ALL WITHDRAWALS
 export const getAllWithdrawals = asyncHandler(async (req, res) => {
-const withdrawals = await Withdrawal.find()
+const withdrawals = await Withdrawal.find({ isDeleted: false })
 .populate("user", "name email")
 .sort({ createdAt: -1 });
 
@@ -101,6 +101,7 @@ res.json(withdrawals);
 export const getMyWithdrawals = asyncHandler(async (req, res) => {
 const withdrawals = await Withdrawal.find({
 user: req.user._id,
+isDeleted: false,
 }).sort({ createdAt: -1 });
 
 res.json(withdrawals);
