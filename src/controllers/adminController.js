@@ -3,6 +3,8 @@ import Transaction from "../models/transactionModel.js";
 import asyncHandler from "express-async-handler";
 import Investment from "../models/investmentModel.js"
 import {sendWalletFundedEmail} from "../services/emailService.js"
+import Deposit from "../models/depositModel.js";
+import Withdrawal from "../models/withdrawalModel.js";
 import bcrypt from "bcryptjs";
 
 /*
