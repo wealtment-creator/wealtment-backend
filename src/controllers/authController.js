@@ -48,25 +48,17 @@ REFERRAL LOOKUP (FIXED)
 let referrer = null;
 let referrerName = "";
 
-if (referralCode && referralCode.trim() !== "") {
-  const cleanCode = referralCode.trim().toLowerCase();
-
-  console.log("Incoming referralCode:", cleanCode);
-
-  referrer = await User.findOne({
-    referralCode: cleanCode,
-  });
-
-  console.log("Found referrer:", referrer);
+if (req.body.referrerId) {
+  referrer = await 
+  User.findById(req.body.referrerId);
 
   if (!referrer) {
     res.status(400);
-    throw new Error("Invalid referral code");
+    throw new Error("Invalid referral");
   }
 
   referrerName = referrer.name;
 }
-
 /*
 ========================================
 CREATE USER (UPDATED)
