@@ -277,4 +277,25 @@ balance: user.balance || 0,
 
 
 
+// GET REFERRER NAME FROM CODE
+export const getReferrerByCode = asyncHandler(async (req, res) => {
+  const { code } = req.params;
+
+  const user = await User.findOne({
+    referralCode: { $regex: `^${code}$`, $options: "i" },
+  }).select("name");
+
+  if (!user) {
+    res.status(404).json({
+      success: false,
+      message: "invalid referral code"
+    });
+    // throw new Error("Invalid referral code");
+  }
+
+  res.json({
+    success: true,
+    name: user.name,
+  });
+});
 

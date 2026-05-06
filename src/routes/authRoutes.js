@@ -6,6 +6,7 @@ import {
   resetPassword,
   logoutUser,
   getMe,
+  getReferrerByCode,
 } from "../controllers/authController.js";
 import { protect } from "../middleware/authMiddleware.js"
 
@@ -17,6 +18,7 @@ router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
 router.post("/logout", logoutUser);
 router.get("/me",protect, getMe);
+router.get("/referrer/:code", getReferrerByCode);
 export default router;
 
 
