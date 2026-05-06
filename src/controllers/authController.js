@@ -42,23 +42,31 @@ throw new Error("User already exists");
 
 /*
 ========================================
-REFERRAL LOOKUP (FIXED)
+REFERRAL LOOKUP (FIXED PROPERLY)
 ========================================
 */
 let referrer = null;
 let referrerName = "";
 
-if (req.body.referrerId) {
-  referrer = await 
-  User.findById(req.body.referrerId);
+if (referralCode && typeof referralCode === "string") {
+const cleanCode = referralCode.trim().toLowerCase();
 
-  if (!referrer) {
-    res.status(400);
-    throw new Error("Invalid referral");
-  }
+console.log("Incoming referralCode:", cleanCode);
 
-  referrerName = referrer.name;
+referrer = await User.findOne({
+referralCode: { $regex: `^${cleanCode}$`, $options: "i" },
+});
+
+console.log("Found referrer:", referrer);
+
+if (!referrer) {
+res.status(400);
+throw new Error("Invalid referral code");
 }
+
+referrerName = referrer.name;
+}
+
 /*
 ========================================
 CREATE USER (UPDATED)
