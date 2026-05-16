@@ -14,6 +14,7 @@ import {
   rejectWithdrawal,
   deleteWithdrawal,
   deleteDeposit,
+  getUserReferralsAdmin,
 } from "../controllers/adminController.js";
 
 import { protect, adminOnly } from "../middleware/authMiddleware.js";
@@ -36,4 +37,5 @@ router.delete("/deposit/:id", protect, adminOnly, deleteDeposit);
 router.put("/deposit/reject/:id", protect, adminOnly, rejectDeposit);
 router.delete("/withdrawal/:id", protect, adminOnly, deleteWithdrawal);
 router.put("/withdrawal/reject/:id", protect, adminOnly, rejectWithdrawal);
-export default router;
+router.get("/users/:id/referrals", protect, adminOnly, getUserReferralsAdmin)
+export default router
