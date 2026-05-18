@@ -444,7 +444,7 @@ if (!user) {
 }
 
 // find referrals
-const referrals = (await User.find({referredBy: userId}).select("name email createdAt hasInvested btcBalance ltcBalance")).sort({ createdAt: -1 });
+const referrals = await (await User.find({referredBy: userId}).select("name email createdAt hasInvested btcBalance ltcBalance")).toSorted({createdAt: -1});
 
 res.json({
   success: true,
