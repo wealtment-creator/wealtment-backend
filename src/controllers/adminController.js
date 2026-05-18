@@ -433,27 +433,31 @@ export const rejectWithdrawal = asyncHandler(async (req, res) => {
 });
 
 export const getUserReferralsAdmin = asyncHandler(async (req, res) => {
-const userId = req.params.id;
+  const userId = req.params.id;
 
-// check user exists
-const user = await User.findById(userId).select("name email");
+  // ✅ check user exists
+  const user = await User.findById(userId).select("name email");
 
-if (!user) {
-  res.status(404);
-  throw new Error("User not found");
-}
+  if (!user) {
+    res.status(404);
+    throw new Error("User not found");
+  }
 
-// find referrals
-const referrals = await (await User.find({referredBy: userId}).select("name email createdAt hasInvested btcBalance ltcBalance")).toSorted({createdAt: -1});
+  // ✅ STEP 1: get referrals WITHOUT sort
+  let referrals = await User.find({ referredBy: userId })
+    .select("name email createdAt hasInvested btcBalance ltcBalance");
 
-res.json({
-  success: true,
-  user: {
-    _id: user._id,
-    name: user.name,
-    email: user.email,
-  },
-  totalReferrals: referrals.length,
-  referrals,
-})
-})
+  // ✅ STEP 2: sort manually (SAFE)
+  referrals = referrals.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  res.json({
+    success: true,
+    user: {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+    },
+    totalReferrals: referrals.length,
+    referrals,
+  });
+});
