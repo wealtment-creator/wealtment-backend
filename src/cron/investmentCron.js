@@ -3,50 +3,77 @@ import Investment from "../models/investmentModel.js";
 import User from "../models/userModel.js";
 import { sendRoiCreditedEmail } from "../services/emailService.js";
 
+let isRunning = false;
+
 cron.schedule("*/1 * * * *", async () => {
-console.log("Checking expired investments...");
+  if (isRunning) {
+    console.log("Previous investment check still running. Skipping...");
+    return;
+  }
 
-const expiredInvestments = await Investment.find({
-status: "active",
-endDate: { $lte: new Date() },
-isCredited: false,
-});
+  isRunning = true;
 
-for (const inv of expiredInvestments) {
-const user = await User.findById(inv.user);
+  try {
+    console.log("Checking expired investments...");
 
-if (user) {
-const totalReturn = inv.amount + inv.totalProfit;
+    const expiredInvestments = await Investment.find({
+      status: "active",
+      endDate: { $lte: new Date() },
+      isCredited: false,
+    });
 
-// ✅ credit correct wallet
-if (inv.coinType === "bitcoin") {
-user.btcBalance += totalReturn;
-}
+    console.log(`Found ${expiredInvestments.length} expired investment(s).`);
 
-if (inv.coinType === "litecoin") {
-user.ltcBalance += totalReturn;
-}
+    for (const inv of expiredInvestments) {
+      try {
+        const user = await User.findById(inv.user);
 
-// keep total balance
-user.balance += totalReturn;
+        if (!user) {
+          console.log(`User not found for investment ${inv._id}`);
+          continue;
+        }
 
-await user.save();
+        const totalReturn = inv.amount + inv.totalProfit;
 
-// update investment
-inv.status = "completed";
-inv.isCredited = true;
-await inv.save();
+        if (inv.coinType === "bitcoin") {
+          user.btcBalance += totalReturn;
+        } else if (inv.coinType === "litecoin") {
+          user.ltcBalance += totalReturn;
+        }
 
-// SEND ROI EMAIL
-try {
-await sendRoiCreditedEmail(
-user.email,
-user.name,
-inv.totalProfit
-);
-} catch (error) {
-console.log("ROI email error:", error.message);
-}
-}
-}
+        user.balance += totalReturn;
+
+        await user.save();
+
+        inv.status = "completed";
+        inv.isCredited = true;
+
+        await inv.save();
+
+        try {
+          await sendRoiCreditedEmail(
+            user.email,
+            user.name,
+            inv.totalProfit
+          );
+        } catch (emailError) {
+          console.error(
+            `Email failed for ${user.email}:`,
+            emailError.message
+          );
+        }
+
+        console.log(`Investment ${inv._id} processed successfully.`);
+      } catch (err) {
+        console.error(
+          `Error processing investment ${inv._id}:`,
+          err.message
+        );
+      }
+    }
+  } catch (err) {
+    console.error("Investment cron failed:", err);
+  } finally {
+    isRunning = false;
+  }
 });
