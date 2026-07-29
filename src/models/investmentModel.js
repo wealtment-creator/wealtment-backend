@@ -1,12 +1,5 @@
 import mongoose from "mongoose";
 
-
-investmentSchema.index({
-    status: 1,
-    isCredited: 1,
-    endDate: 1,
-})
-
 const investmentSchema = new mongoose.Schema(
 {
 user: {
@@ -64,6 +57,12 @@ default: false,
 },
 { timestamps: true }
 );
+
+investmentSchema.index({
+    status: 1,
+    isCredited: 1,
+    endDate: 1,
+})
 
 const Investment = mongoose.model("Investment", investmentSchema);
 
