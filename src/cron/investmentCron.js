@@ -5,7 +5,7 @@ import { sendRoiCreditedEmail } from "../services/emailService.js";
 
 let isRunning = false;
 
-cron.schedule("*/1 * * * *", async () => {
+cron.schedule("*/5 * * * *", async () => {
   if (isRunning) {
     console.log("Previous investment check still running. Skipping...");
     return;

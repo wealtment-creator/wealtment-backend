@@ -3,8 +3,9 @@ import Deposit from "../models/depositModel.js";
 import asyncHandler from "express-async-handler";
 import bcrypt from "bcryptjs";
 import {
-sendPasswordChangedEmail,
+sendPasswordChangedEmail, sendRoiCreditedEmail,
 } from "../services/emailService.js";
+import Investment from "../models/investmentModel.js";
 
 /*
 ========================================
@@ -210,30 +211,78 @@ message: "Password updated successfully",
 
 
 export const getUserProfile = asyncHandler(async (req, res) => {
- const user = await User.findById(req.user._id).select("-password");
+  // Load user
+  const user = await User.findById(req.user._id).select("-password");
 
- if (!user) {
- res.status(404);
- throw new Error("User not found");
- }
+  if (!user) {
+    res.status(404);
+    throw new Error("User not found");
+  }
 
- res.json({
- _id: user._id,
- name: user.name,
- email: user.email,
- role: user.role,
- balance: user.balance || 0,
- btcBalance: user.btcBalance || 0,
- ltcBalance: user.ltcBalance || 0,
- referralBalance: user.referralEarnings,
- totalBalance: user.balance, 
- 
-//  + user.referralEarnings,
- bitcoinAddress: user.bitcoinAddress || "",
- litecoinAddress: user.litecoinAddress || "",
- });
+  // Check for matured investments belonging to this user
+  const maturedInvestments = await Investment.find({
+    user: user._id,
+    status: "active",
+    isCredited: false,
+    endDate: { $lte: new Date() },
+  });
+
+  let credited = false;
+
+  for (const inv of maturedInvestments) {
+    const totalReturn = inv.amount + inv.totalProfit;
+
+    // Credit correct wallet
+    if (inv.coinType === "bitcoin") {
+      user.btcBalance += totalReturn;
+    }
+
+    if (inv.coinType === "litecoin") {
+      user.ltcBalance += totalReturn;
+    }
+
+    // Update total balance
+    user.balance += totalReturn;
+
+    // Mark investment as completed
+    inv.status = "completed";
+    inv.isCredited = true;
+
+    await inv.save();
+
+    credited = true;
+
+    // Send ROI email
+    try {
+      await sendRoiCreditedEmail(
+        user.email,
+        user.name,
+        inv.totalProfit
+      );
+    } catch (error) {
+      console.log("ROI email error:", error.message);
+    }
+  }
+
+  // Save user once if any investment was credited
+  if (credited) {
+    await user.save();
+  }
+
+  res.json({
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    balance: user.balance || 0,
+    btcBalance: user.btcBalance || 0,
+    ltcBalance: user.ltcBalance || 0,
+    referralBalance: user.referralEarnings,
+    totalBalance: user.balance,
+    bitcoinAddress: user.bitcoinAddress || "",
+    litecoinAddress: user.litecoinAddress || "",
+  });
 });
-
 
 /*
 ========================================
