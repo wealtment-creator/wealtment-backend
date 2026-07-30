@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import connectDB from "./config/db.js";
-// import "./cron/investmentCron.js"
+import "./cron/investmentCron.js"
 
 // Routes
 import authRoutes from "./routes/authRoutes.js";
